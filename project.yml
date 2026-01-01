@@ -1,0 +1,66 @@
+name: OscarsWithFriends
+options:
+  bundleIdPrefix: com.oscarswithfriends
+  deploymentTarget:
+    iOS: "18.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+packages:
+  FirebaseAuth:
+    url: https://github.com/firebase/firebase-ios-sdk
+    version: 11.0.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    version: 8.0.0
+
+targets:
+  OscarsWithFriends:
+    type: application
+    platform: iOS
+    sources:
+      - OscarsWithFriends
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oscarswithfriends.app
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: OscarsWithFriends/Info.plist
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: YES
+    dependencies:
+      - package: FirebaseAuth
+        product: FirebaseAuth
+      - package: FirebaseAuth
+        product: FirebaseFirestore
+      - package: FirebaseAuth
+        product: FirebaseFunctions
+      - package: FirebaseAuth
+        product: FirebaseMessaging
+      - package: GoogleSignIn
+        product: GoogleSignIn
+
+    entitlements:
+      path: OscarsWithFriends/OscarsWithFriends.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
+        aps-environment: development
+
+schemes:
+  OscarsWithFriends:
+    build:
+      targets:
+        OscarsWithFriends: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

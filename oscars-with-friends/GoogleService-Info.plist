@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>183125019420-3tq6igdafs09qvjtok96o6vdt07ia92e.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.183125019420-3tq6igdafs09qvjtok96o6vdt07ia92e</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB5XawG1TBwkvID-UTHjjrSz3wfQ3zNot4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>183125019420</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.aamsco.oscars-with-friends</string>
+	<key>PROJECT_ID</key>
+	<string>oscars-with-friends</string>
+	<key>STORAGE_BUCKET</key>
+	<string>oscars-with-friends.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:183125019420:ios:81db74427991fccab1c8d9</string>
+	<key>DATABASE_URL</key>
+	<string>https://oscars-with-friends-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>
