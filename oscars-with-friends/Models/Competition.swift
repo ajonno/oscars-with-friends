@@ -43,4 +43,19 @@ struct Competition: Codable, Identifiable, Hashable {
             updatedAt: updatedAt
         )
     }
+
+    static func preview(name: String = "Oscar Pool 2026", status: CompetitionStatus = .open) -> Competition {
+        Competition(
+            id: UUID().uuidString,
+            name: name,
+            createdBy: "user123",
+            ceremonyYear: "2026",
+            inviteCode: "ABC123",
+            participantCount: 5,
+            status: status,
+            inactivatedAt: nil,
+            createdAt: Timestamp(date: Date()),
+            updatedAt: Timestamp(date: Date())
+        )
+    }
 }

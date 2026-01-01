@@ -13,4 +13,16 @@ struct Participant: Codable, Identifiable {
     var odUserIdValue: String {
         id ?? odUserId
     }
+
+    static func preview(name: String, score: Int) -> Participant {
+        Participant(
+            id: UUID().uuidString,
+            odUserId: UUID().uuidString,
+            displayName: name,
+            photoUrl: nil,
+            score: score,
+            joinedAt: Timestamp(date: Date()),
+            lastVotedAt: nil
+        )
+    }
 }

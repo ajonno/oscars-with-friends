@@ -26,8 +26,18 @@ struct LeaderboardView: View {
                 leaderboardList
             }
         }
-        .navigationTitle("Leaderboard")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 2) {
+                    Text("Leaderboard")
+                        .font(.headline)
+                    Text(competition.name)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
         .task {
             await loadParticipants()
         }
@@ -46,6 +56,8 @@ struct LeaderboardView: View {
                 )
             }
         }
+        .listStyle(.insetGrouped)
+        .contentMargins(.top, 8, for: .scrollContent)
     }
 
     private var sortedParticipants: [Participant] {
@@ -66,6 +78,49 @@ struct LeaderboardView: View {
         } catch {
             self.error = error.localizedDescription
             isLoading = false
+        }
+    }
+}
+
+#Preview("Leaderboard") {
+    NavigationStack {
+        LeaderboardPreview()
+    }
+}
+
+private struct LeaderboardPreview: View {
+    private let competition = Competition.preview(name: "Oscar Pool 2026")
+    private let participants = [
+        Participant.preview(name: "Sarah Johnson", score: 12),
+        Participant.preview(name: "Mike Chen", score: 10),
+        Participant.preview(name: "Emma Wilson", score: 8),
+        Participant.preview(name: "James Brown", score: 6),
+        Participant.preview(name: "You", score: 5),
+    ]
+
+    var body: some View {
+        List {
+            ForEach(Array(participants.enumerated()), id: \.element.id) { index, participant in
+                LeaderboardRow(
+                    rank: index + 1,
+                    participant: participant,
+                    isCurrentUser: participant.displayName == "You"
+                )
+            }
+        }
+        .listStyle(.insetGrouped)
+        .contentMargins(.top, 8, for: .scrollContent)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 2) {
+                    Text("Leaderboard")
+                        .font(.headline)
+                    Text(competition.name)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 }

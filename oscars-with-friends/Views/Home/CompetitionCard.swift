@@ -3,43 +3,70 @@ import SwiftUI
 struct CompetitionCard: View {
     let competition: Competition
     var isDisabled: Bool = false
+    var onLeaderboardTap: (() -> Void)? = nil
 
     private var isInactive: Bool {
         competition.status == .inactive
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(competition.name)
-                        .font(.headline)
-                        .lineLimit(1)
+        VStack(spacing: 0) {
+            // Main content
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(competition.name)
+                            .font(.headline)
+                            .lineLimit(1)
 
-                    Text("\(competition.ceremonyYear) Academy Awards")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        Text("\(competition.ceremonyYear) Academy Awards")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    StatusBadge(status: competition.status)
                 }
 
-                Spacer()
+                HStack {
+                    Label("\(competition.participantCount)", systemImage: "person.2")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                StatusBadge(status: competition.status)
+                    Spacer()
+
+                    Text("Code: \(competition.inviteCode)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.blue)
+                }
             }
+            .padding()
 
-            HStack {
-                Label("\(competition.participantCount)", systemImage: "person.2")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                Text("Code: \(competition.inviteCode)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.blue)
+            // Leaderboard button
+            if let onLeaderboardTap, !isDisabled {
+                Button {
+                    onLeaderboardTap()
+                } label: {
+                    HStack {
+                        Image(systemName: "trophy.fill")
+                            .foregroundStyle(.yellow)
+                        Text("Leaderboard")
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.tertiarySystemGroupedBackground))
+                }
+                .buttonStyle(.plain)
             }
         }
-        .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .opacity(isInactive || isDisabled ? 0.5 : 1.0)

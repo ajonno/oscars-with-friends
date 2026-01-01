@@ -14,6 +14,7 @@ struct HomeView: View {
     @State private var showCreateCompetition = false
     @State private var showJoinCompetition = false
     @State private var selectedCompetition: Competition?
+    @State private var leaderboardCompetition: Competition?
     @State private var error: String?
     @State private var filter: CompetitionFilter = .all
 
@@ -88,6 +89,7 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Competitions")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
@@ -115,6 +117,9 @@ struct HomeView: View {
             }
             .navigationDestination(item: $selectedCompetition) { competition in
                 CompetitionDetailView(competition: competition)
+            }
+            .navigationDestination(item: $leaderboardCompetition) { competition in
+                LeaderboardView(competition: competition)
             }
             .task {
                 await loadCompetitions()
@@ -165,15 +170,21 @@ struct HomeView: View {
         List(filteredCompetitions) { competition in
             let isTappable = isCompetitionTappable(competition)
 
-            CompetitionCard(competition: competition, isDisabled: !isTappable)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if isTappable {
-                        selectedCompetition = competition
-                    }
+            CompetitionCard(
+                competition: competition,
+                isDisabled: !isTappable,
+                onLeaderboardTap: {
+                    leaderboardCompetition = competition
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowSeparator(.hidden)
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if isTappable {
+                    selectedCompetition = competition
+                }
+            }
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
     }
@@ -194,6 +205,49 @@ struct HomeView: View {
     }
 }
 
-#Preview {
+#Preview("Home View") {
     HomeView()
+}
+
+#Preview("With Competitions") {
+    HomeViewPreview()
+}
+
+private struct HomeViewPreview: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                // Filter picker
+                Picker("Filter", selection: .constant(CompetitionFilter.all)) {
+                    ForEach(CompetitionFilter.allCases, id: \.self) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+
+                // Sample competitions
+                ForEach(0..<3) { i in
+                    CompetitionCard(
+                        competition: Competition.preview(
+                            name: ["Oscar Pool 2026", "Family Picks", "Movie Buffs"][i],
+                            status: [.open, .open, .inactive][i]
+                        ),
+                        onLeaderboardTap: {}
+                    )
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowSeparator(.hidden)
+                }
+            }
+            .listStyle(.plain)
+            .navigationTitle("Competitions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+    }
 }
