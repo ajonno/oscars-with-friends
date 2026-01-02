@@ -48,7 +48,7 @@
 
 /* Begin PBXFileReference section */
 		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
-		EFEEBCD72F066F9F0072649D /* oscars-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "oscars-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFEEBCD72F066F9F0072649D /* awards-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "awards-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFEEBCE52F06704A0072649D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EFEEBCEB2F06704A0072649D /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		EFEEBCEC2F06704A0072649D /* Ceremony.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ceremony.swift; sourceTree = "<group>"; };
@@ -57,8 +57,6 @@
 		EFEEBCEF2F06704A0072649D /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		EFEEBCF02F06704A0072649D /* Vote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vote.swift; sourceTree = "<group>"; };
 		EFEEBCF22F06704A0072649D /* oscars_with_friendsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = oscars_with_friendsApp.swift; sourceTree = "<group>"; };
-		EFEEBCF32F06704A0072649D /* oscars-with-friends.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "oscars-with-friends.xcodeproj"; sourceTree = "<group>"; };
-		EFEEBCF42F06704A0072649D /* OscarsWithFriends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OscarsWithFriends.entitlements; sourceTree = "<group>"; };
 		EFEEBCF72F06704A0072649D /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		EFEEBCF82F06704A0072649D /* CloudFunctionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudFunctionsService.swift; sourceTree = "<group>"; };
 		EFEEBCF92F06704A0072649D /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
@@ -75,7 +73,7 @@
 		EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
 		EFEEBD0C2F06704A0072649D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		EFEEBD0E2F06704A0072649D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		EFEEBD352F06719F0072649D /* oscars-with-friends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "oscars-with-friends.entitlements"; sourceTree = "<group>"; };
+		EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "awards-with-friends.entitlements"; sourceTree = "<group>"; };
 		EFEEBD412F06781D0072649D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EFEEBD432F0679DD0072649D /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		EFEEBD452F0683060072649D /* CeremoniesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeremoniesListView.swift; sourceTree = "<group>"; };
@@ -106,11 +104,9 @@
 			children = (
 				EFEEBD432F0679DD0072649D /* Media.xcassets */,
 				EFEEBD412F06781D0072649D /* GoogleService-Info.plist */,
-				EFEEBD352F06719F0072649D /* oscars-with-friends.entitlements */,
+				EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */,
 				EFEEBCE72F06704A0072649D /* App */,
 				EFEEBCF12F06704A0072649D /* Models */,
-				EFEEBCF32F06704A0072649D /* oscars-with-friends.xcodeproj */,
-				EFEEBCF42F06704A0072649D /* OscarsWithFriends.entitlements */,
 				EFEEBCFB2F06704A0072649D /* Services */,
 				EFEEBCFC2F06704A0072649D /* ViewModels */,
 				EFEEBD0F2F06704A0072649D /* Views */,
@@ -122,7 +118,7 @@
 		EFEEBCD82F066F9F0072649D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EFEEBCD72F066F9F0072649D /* oscars-with-friends.app */,
+				EFEEBCD72F066F9F0072649D /* awards-with-friends.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -236,11 +232,6 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		EFEEBD102F06704A0072649D /* Products */ = {
-			isa = PBXGroup;
-			name = Products;
-			sourceTree = "<group>";
-		};
 		EFEEBD362F06757A0072649D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,9 +251,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EFEEBCD62F066F9F0072649D /* oscars-with-friends */ = {
+		EFEEBCD62F066F9F0072649D /* awards-with-friends */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EFEEBCE22F066FA00072649D /* Build configuration list for PBXNativeTarget "oscars-with-friends" */;
+			buildConfigurationList = EFEEBCE22F066FA00072649D /* Build configuration list for PBXNativeTarget "awards-with-friends" */;
 			buildPhases = (
 				EFEEBCD32F066F9F0072649D /* Sources */,
 				EFEEBCD42F066F9F0072649D /* Frameworks */,
@@ -272,7 +263,7 @@
 			);
 			dependencies = (
 			);
-			name = "oscars-with-friends";
+			name = "awards-with-friends";
 			packageProductDependencies = (
 				EFEEBD312F06718B0072649D /* GoogleSignIn */,
 				EFEEBD332F06718B0072649D /* GoogleSignInSwift */,
@@ -284,7 +275,7 @@
 				EF368C5A2F068D3B00612459 /* Kingfisher */,
 			);
 			productName = "oscars-with-friends";
-			productReference = EFEEBCD72F066F9F0072649D /* oscars-with-friends.app */;
+			productReference = EFEEBCD72F066F9F0072649D /* awards-with-friends.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -302,7 +293,7 @@
 					};
 				};
 			};
-			buildConfigurationList = EFEEBCD22F066F9F0072649D /* Build configuration list for PBXProject "oscars-with-friends" */;
+			buildConfigurationList = EFEEBCD22F066F9F0072649D /* Build configuration list for PBXProject "awards-with-friends" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -319,15 +310,9 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EFEEBCD82F066F9F0072649D /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = EFEEBD102F06704A0072649D /* Products */;
-					ProjectRef = EFEEBCF32F06704A0072649D /* oscars-with-friends.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
-				EFEEBCD62F066F9F0072649D /* oscars-with-friends */,
+				EFEEBCD62F066F9F0072649D /* awards-with-friends */,
 			);
 		};
 /* End PBXProject section */
@@ -508,7 +493,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "oscars-with-friends.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
@@ -525,7 +510,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.oscars-with-friends";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.awards-with-friends";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -542,7 +527,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "oscars-with-friends.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
@@ -559,7 +544,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.oscars-with-friends";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.awards-with-friends";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -574,7 +559,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EFEEBCD22F066F9F0072649D /* Build configuration list for PBXProject "oscars-with-friends" */ = {
+		EFEEBCD22F066F9F0072649D /* Build configuration list for PBXProject "awards-with-friends" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EFEEBCE02F066FA00072649D /* Debug */,
@@ -583,7 +568,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EFEEBCE22F066FA00072649D /* Build configuration list for PBXNativeTarget "oscars-with-friends" */ = {
+		EFEEBCE22F066FA00072649D /* Build configuration list for PBXNativeTarget "awards-with-friends" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EFEEBCE32F066FA00072649D /* Debug */,
