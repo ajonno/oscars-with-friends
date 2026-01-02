@@ -60,6 +60,10 @@ struct MainTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: .switchToCompetitionsTab)) { _ in
             selectedTab = .competitions
         }
+        .task {
+            try? await Task.sleep(for: .seconds(1))
+            await NotificationService.shared.requestPermissionIfNeeded()
+        }
     }
 }
 

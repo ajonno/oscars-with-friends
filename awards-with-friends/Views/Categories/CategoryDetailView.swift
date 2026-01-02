@@ -159,8 +159,8 @@ struct NomineeCard: View {
     let onTap: () -> Void
 
     // Placeholder images hosted on Firebase
-    private static let personPlaceholder = URL(string: "https://oscars-with-friends.web.app/placeholders/person.svg")!
-    private static let moviePlaceholder = URL(string: "https://oscars-with-friends.web.app/placeholders/movie.svg")!
+    private static let personPlaceholder = URL(string: "https://awardswithfriends-25718.web.app/placeholders/person.svg")!
+    private static let moviePlaceholder = URL(string: "https://awardswithfriends-25718.web.app/placeholders/movie.svg")!
 
     private var isPeopleCategory: Bool {
         let lowercased = categoryName.lowercased()

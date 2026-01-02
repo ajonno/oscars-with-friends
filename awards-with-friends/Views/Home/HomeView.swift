@@ -17,6 +17,7 @@ struct HomeView: View {
     @State private var leaderboardCompetition: Competition?
     @State private var error: String?
     @State private var filter: CompetitionFilter = .all
+    @State private var refreshTrigger = UUID()
 
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
@@ -115,13 +116,23 @@ struct HomeView: View {
             .sheet(isPresented: $showJoinCompetition) {
                 JoinCompetitionView()
             }
+            .onChange(of: showCreateCompetition) { _, isShowing in
+                if !isShowing {
+                    refreshTrigger = UUID()
+                }
+            }
+            .onChange(of: showJoinCompetition) { _, isShowing in
+                if !isShowing {
+                    refreshTrigger = UUID()
+                }
+            }
             .navigationDestination(item: $selectedCompetition) { competition in
                 CompetitionDetailView(competition: competition)
             }
             .navigationDestination(item: $leaderboardCompetition) { competition in
                 LeaderboardView(competition: competition)
             }
-            .task {
+            .task(id: refreshTrigger) {
                 await loadCompetitions()
             }
         }

@@ -51,10 +51,15 @@ struct LoginView: View {
                             }
                         } label: {
                             HStack {
-                                Image("google-logo")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
+                                Text("G")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [.red, .yellow, .green, .blue],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
                                 Text("Sign in with Google")
                                     .fontWeight(.medium)
                             }

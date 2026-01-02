@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		EF368C5B2F068D3B00612459 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = EF368C5A2F068D3B00612459 /* Kingfisher */; };
 		EF368C5D2F07619800612459 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF368C5C2F07619800612459 /* EventType.swift */; };
+		EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */; };
 		EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */; };
 		EFEEBD162F06704A0072649D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF72F06704A0072649D /* AuthService.swift */; };
 		EFEEBD172F06704A0072649D /* oscars_with_friendsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF22F06704A0072649D /* oscars_with_friendsApp.swift */; };
@@ -40,7 +41,6 @@
 		EFEEBD3C2F06757A0072649D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EFEEBD3B2F06757A0072649D /* FirebaseFirestore */; };
 		EFEEBD3E2F06757A0072649D /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = EFEEBD3D2F06757A0072649D /* FirebaseFunctions */; };
 		EFEEBD402F06757A0072649D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = EFEEBD3F2F06757A0072649D /* FirebaseMessaging */; };
-		EFEEBD422F06781D0072649D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFEEBD412F06781D0072649D /* GoogleService-Info.plist */; };
 		EFEEBD442F0679DD0072649D /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFEEBD432F0679DD0072649D /* Media.xcassets */; };
 		EFEEBD482F0683060072649D /* CeremonyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD462F0683060072649D /* CeremonyDetailView.swift */; };
 		EFEEBD492F0683060072649D /* CeremoniesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD452F0683060072649D /* CeremoniesListView.swift */; };
@@ -48,6 +48,8 @@
 
 /* Begin PBXFileReference section */
 		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
+		EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		EFD406D62F07B00000E90E71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EFEEBCD72F066F9F0072649D /* awards-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "awards-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFEEBCE52F06704A0072649D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EFEEBCEB2F06704A0072649D /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
@@ -74,7 +76,6 @@
 		EFEEBD0C2F06704A0072649D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		EFEEBD0E2F06704A0072649D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "awards-with-friends.entitlements"; sourceTree = "<group>"; };
-		EFEEBD412F06781D0072649D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EFEEBD432F0679DD0072649D /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		EFEEBD452F0683060072649D /* CeremoniesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeremoniesListView.swift; sourceTree = "<group>"; };
 		EFEEBD462F0683060072649D /* CeremonyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeremonyDetailView.swift; sourceTree = "<group>"; };
@@ -102,13 +103,13 @@
 		EFEEBCCE2F066F9F0072649D = {
 			isa = PBXGroup;
 			children = (
+				EFD406D62F07B00000E90E71 /* Info.plist */,
+				EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */,
 				EFEEBD432F0679DD0072649D /* Media.xcassets */,
-				EFEEBD412F06781D0072649D /* GoogleService-Info.plist */,
 				EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */,
 				EFEEBCE72F06704A0072649D /* App */,
 				EFEEBCF12F06704A0072649D /* Models */,
 				EFEEBCFB2F06704A0072649D /* Services */,
-				EFEEBCFC2F06704A0072649D /* ViewModels */,
 				EFEEBD0F2F06704A0072649D /* Views */,
 				EFEEBD362F06757A0072649D /* Frameworks */,
 				EFEEBCD82F066F9F0072649D /* Products */,
@@ -155,13 +156,6 @@
 				EFEEBCFA2F06704A0072649D /* NotificationService.swift */,
 			);
 			path = Services;
-			sourceTree = "<group>";
-		};
-		EFEEBCFC2F06704A0072649D /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		EFEEBCFF2F06704A0072649D /* Auth */ = {
@@ -323,7 +317,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EFEEBD442F0679DD0072649D /* Media.xcassets in Resources */,
-				EFEEBD422F06781D0072649D /* GoogleService-Info.plist in Resources */,
+				EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,10 +489,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awards With Friends";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -510,7 +507,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.awards-with-friends";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -529,10 +526,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Awards With Friends";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -544,7 +544,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.aamsco.awards-with-friends";
+				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

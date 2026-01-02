@@ -5,38 +5,89 @@ struct CeremoniesListView: View {
     @State private var ceremonies: [Ceremony] = []
     @State private var isLoading = true
     @State private var error: String?
+    @State private var selectedEvent: String? = nil
+
+    private var eventNames: [String] {
+        let names = Set(ceremonies.map { $0.eventDisplayName })
+        return Array(names).sorted()
+    }
+
+    private var filteredCeremonies: [Ceremony] {
+        guard let selectedEvent else { return ceremonies }
+        return ceremonies.filter { $0.eventDisplayName == selectedEvent }
+    }
 
     var body: some View {
         NavigationStack {
-            Group {
+            VStack(spacing: 0) {
+                Text("Award Ceremonies")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+
+                if !ceremonies.isEmpty {
+                    eventFilter
+                }
+
                 if isLoading {
+                    Spacer()
                     ProgressView("Loading ceremonies...")
+                    Spacer()
                 } else if ceremonies.isEmpty {
                     ContentUnavailableView(
                         "No Ceremonies",
                         systemImage: "calendar",
                         description: Text("No ceremonies available yet")
                     )
+                } else if filteredCeremonies.isEmpty {
+                    ContentUnavailableView(
+                        "No Ceremonies",
+                        systemImage: "calendar",
+                        description: Text("No ceremonies for this event")
+                    )
                 } else {
                     ceremoniesList
                 }
             }
-            .navigationTitle("Ceremonies")
+            .toolbar(.hidden, for: .navigationBar)
         }
         .task {
             await loadCeremonies()
         }
     }
 
+    private var eventFilter: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                FilterChip(title: "All", isSelected: selectedEvent == nil) {
+                    selectedEvent = nil
+                }
+
+                ForEach(eventNames, id: \.self) { eventName in
+                    FilterChip(title: eventName, isSelected: selectedEvent == eventName) {
+                        selectedEvent = eventName
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 16)
+        }
+    }
+
     private var ceremoniesList: some View {
-        List(ceremonies) { ceremony in
+        List(filteredCeremonies) { ceremony in
             NavigationLink {
                 CeremonyDetailView(ceremony: ceremony)
             } label: {
                 CeremonyRow(ceremony: ceremony)
             }
-            .contentShape(Rectangle())
         }
+        .listStyle(.insetGrouped)
+        .contentMargins(.top, 0, for: .scrollContent)
     }
 
     private func loadCeremonies() async {
@@ -153,21 +204,81 @@ struct CeremonyRow: View {
     }
 }
 
+struct FilterChip: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.accentColor : Color(.secondarySystemGroupedBackground))
+                .foregroundStyle(isSelected ? .white : .primary)
+                .cornerRadius(20)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 #Preview("Ceremonies List") {
     CeremoniesListPreview()
 }
 
 private struct CeremoniesListPreview: View {
+    @State private var selectedEvent: String? = nil
+
+    private var eventNames: [String] {
+        let names = Set(Ceremony.previewList.map { $0.eventDisplayName })
+        return Array(names).sorted()
+    }
+
+    private var filteredCeremonies: [Ceremony] {
+        guard let selectedEvent else { return Ceremony.previewList }
+        return Ceremony.previewList.filter { $0.eventDisplayName == selectedEvent }
+    }
+
     var body: some View {
         NavigationStack {
-            List(Ceremony.previewList) { ceremony in
-                NavigationLink {
-                    Text(ceremony.name)
-                } label: {
-                    CeremonyRow(ceremony: ceremony)
+            VStack(spacing: 0) {
+                Text("Award Ceremonies")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        FilterChip(title: "All", isSelected: selectedEvent == nil) {
+                            selectedEvent = nil
+                        }
+
+                        ForEach(eventNames, id: \.self) { eventName in
+                            FilterChip(title: eventName, isSelected: selectedEvent == eventName) {
+                                selectedEvent = eventName
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 }
+
+                List(filteredCeremonies) { ceremony in
+                    NavigationLink {
+                        Text(ceremony.name)
+                    } label: {
+                        CeremonyRow(ceremony: ceremony)
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .contentMargins(.top, 0, for: .scrollContent)
             }
-            .navigationTitle("Ceremonies")
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 }

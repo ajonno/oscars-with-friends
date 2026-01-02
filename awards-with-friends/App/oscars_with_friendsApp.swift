@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import GoogleSignIn
 
 @main
 struct oscars_with_friendsApp: App {
@@ -15,8 +16,15 @@ struct oscars_with_friendsApp: App {
 
     init() {
         FirebaseApp.configure()
+
+        // Configure Google Sign-In with client ID from Firebase
+        if let clientID = FirebaseApp.app()?.options.clientID {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+        }
+
         _authService = State(initialValue: AuthService())
     }
+    
 
     var body: some Scene {
         WindowGroup {
