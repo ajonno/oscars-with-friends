@@ -7,8 +7,12 @@ struct CreateCompetitionView: View {
     @State private var isLoading = false
     @State private var error: String?
     @State private var createdInviteCode: String?
+    @State private var ceremonies: [Ceremony] = []
+    @State private var selectedCeremonyId: String?
 
-    private let ceremonyYear = "2026" // Current ceremony year
+    private var selectedCeremony: Ceremony? {
+        ceremonies.first { $0.id == selectedCeremonyId }
+    }
 
     var body: some View {
         NavigationStack {
@@ -17,6 +21,21 @@ struct CreateCompetitionView: View {
             } else {
                 formView
             }
+        }
+        .task {
+            await loadCeremonies()
+        }
+    }
+
+    private func loadCeremonies() async {
+        do {
+            ceremonies = try await FirestoreService.shared.ceremoniesList()
+            // Default to first ceremony
+            if selectedCeremonyId == nil, let first = ceremonies.first {
+                selectedCeremonyId = first.id
+            }
+        } catch {
+            self.error = "Failed to load ceremonies"
         }
     }
 
@@ -32,11 +51,11 @@ struct CreateCompetitionView: View {
             }
 
             Section {
-                HStack {
-                    Text("Ceremony")
-                    Spacer()
-                    Text("\(ceremonyYear) Academy Awards")
-                        .foregroundStyle(.secondary)
+                Picker("Ceremony", selection: $selectedCeremonyId) {
+                    ForEach(ceremonies) { ceremony in
+                        Text("\(ceremony.name) (\(ceremony.eventDisplayName))")
+                            .tag(ceremony.id as String?)
+                    }
                 }
             }
 
@@ -127,13 +146,25 @@ struct CreateCompetitionView: View {
     }
 
     private func createCompetition() async {
+        guard let ceremony = selectedCeremony else {
+            error = "Please select a ceremony"
+            return
+        }
+
         isLoading = true
         error = nil
+
+        guard let event = ceremony.event else {
+            error = "Ceremony is missing event type"
+            isLoading = false
+            return
+        }
 
         do {
             let response = try await CloudFunctionsService.shared.createCompetition(
                 name: name,
-                ceremonyYear: ceremonyYear
+                ceremonyYear: ceremony.year,
+                event: event
             )
             createdInviteCode = response.inviteCode
         } catch {

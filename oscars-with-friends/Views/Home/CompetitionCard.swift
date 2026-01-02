@@ -13,20 +13,14 @@ struct CompetitionCard: View {
         VStack(spacing: 0) {
             // Main content
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(competition.name)
-                            .font(.headline)
-                            .lineLimit(1)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(competition.name)
+                        .font(.headline)
+                        .lineLimit(1)
 
-                        Text("\(competition.ceremonyYear) Academy Awards")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    StatusBadge(status: competition.status)
+                    Text("\(competition.ceremonyYear) \(competition.eventDisplayName)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
 
                 HStack {
@@ -34,12 +28,14 @@ struct CompetitionCard: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Spacer()
-
                     Text("Code: \(competition.inviteCode)")
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundStyle(.blue)
+
+                    Spacer()
+
+                    StatusBadge(status: competition.status)
                 }
             }
             .padding()

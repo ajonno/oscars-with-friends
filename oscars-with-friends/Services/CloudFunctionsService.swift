@@ -18,9 +18,13 @@ final class CloudFunctionsService {
         let inviteCode: String
     }
 
-    func createCompetition(name: String, ceremonyYear: String) async throws -> CreateCompetitionResponse {
+    func createCompetition(name: String, ceremonyYear: String, event: String) async throws -> CreateCompetitionResponse {
         let callable = functions.httpsCallable("createCompetition")
-        let result = try await callable.call(["name": name, "ceremonyYear": ceremonyYear])
+        let result = try await callable.call([
+            "name": name,
+            "ceremonyYear": ceremonyYear,
+            "event": event
+        ])
 
         guard let data = result.data as? [String: Any] else {
             throw CloudFunctionError.invalidResponse

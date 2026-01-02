@@ -14,14 +14,15 @@ struct CeremonyDetailView: View {
 
     @State private var categories: [Category] = []
     @State private var votes: [String: Vote] = [:] // categoryId -> Vote
-    @State private var competitionCount: Int = 0
+    @State private var hasAnyCompetition: Bool = false  // User is in at least one competition for this ceremony
+    @State private var openCompetitionCount: Int = 0    // Count of open competitions (can vote)
     @State private var isLoading = true
     @State private var error: String?
-    @State private var selectedCategoryId: String?
+    @State private var selectedCategory: Category?
 
-    // Only show votes if user has active competitions
+    // Show votes if user has ANY competition for this ceremony (not just open ones)
     private var activeVotes: [String: Vote] {
-        competitionCount > 0 ? votes : [:]
+        hasAnyCompetition ? votes : [:]
     }
 
     private var votedCount: Int {
@@ -60,8 +61,13 @@ struct CeremonyDetailView: View {
         .task {
             await loadData()
         }
-        .sheet(item: $selectedCategoryId) { categoryId in
-            CategoryViewSheet(categoryId: categoryId, ceremonyYear: ceremony.year)
+        .sheet(item: $selectedCategory) { category in
+            CategoryViewSheet(
+                category: category,
+                ceremonyYear: ceremony.year,
+                initialVote: votes[category.id ?? ""],
+                hasActiveCompetition: openCompetitionCount > 0
+            )
         }
     }
 
@@ -73,9 +79,9 @@ struct CeremonyDetailView: View {
                 } label: {
                     HStack {
                         Image(systemName: "person.3.fill")
-                            .foregroundStyle(competitionCount > 0 ? .blue : .orange)
-                        if competitionCount > 0 {
-                            Text("You can vote in \(competitionCount) active \(competitionCount == 1 ? "competition" : "competitions")")
+                            .foregroundStyle(openCompetitionCount > 0 ? .blue : .orange)
+                        if openCompetitionCount > 0 {
+                            Text("You can vote in \(openCompetitionCount) active \(openCompetitionCount == 1 ? "competition" : "competitions")")
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("Join a competition to vote on awards!")
@@ -94,7 +100,7 @@ struct CeremonyDetailView: View {
             Section {
                 ForEach(categories) { category in
                     Button {
-                        selectedCategoryId = category.id
+                        selectedCategory = category
                     } label: {
                         BrowseCategoryRow(category: category, vote: activeVotes[category.id ?? ""])
                     }
@@ -109,7 +115,7 @@ struct CeremonyDetailView: View {
         // Listen for categories
         Task {
             do {
-                for try await updatedCategories in FirestoreService.shared.categoriesStream(for: ceremony.year) {
+                for try await updatedCategories in FirestoreService.shared.categoriesStream(for: ceremony.year, event: ceremony.event) {
                     categories = updatedCategories.sorted { $0.displayOrder < $1.displayOrder }
                     if isLoading {
                         isLoading = false
@@ -124,7 +130,7 @@ struct CeremonyDetailView: View {
         // Listen for votes
         Task {
             do {
-                for try await updatedVotes in FirestoreService.shared.myCeremonyVotesStream(ceremonyYear: ceremony.year) {
+                for try await updatedVotes in FirestoreService.shared.myCeremonyVotesStream(ceremonyYear: ceremony.year, event: ceremony.event) {
                     votes = updatedVotes
                 }
             } catch {
@@ -136,10 +142,22 @@ struct CeremonyDetailView: View {
         Task {
             do {
                 for try await competitions in FirestoreService.shared.myCompetitionsStream() {
-                    let activeForCeremony = competitions.filter {
-                        $0.ceremonyYear == ceremony.year && $0.status == .open
+                    // All competitions for this ceremony (to show votes)
+                    let allForCeremony = competitions.filter { comp in
+                        guard comp.ceremonyYear == ceremony.year && comp.status != .inactive else {
+                            return false
+                        }
+                        // Match by event (nil matches anything)
+                        if let compEvent = comp.event, let ceremonyEvent = ceremony.event {
+                            return compEvent == ceremonyEvent
+                        }
+                        return true // Either event is nil, allow match
                     }
-                    competitionCount = activeForCeremony.count
+                    hasAnyCompetition = !allForCeremony.isEmpty
+
+                    // Only open competitions (to enable voting)
+                    let openForCeremony = allForCeremony.filter { $0.status == .open }
+                    openCompetitionCount = openForCeremony.count
                 }
             } catch {
                 // Handle silently
@@ -227,28 +245,29 @@ struct BrowseCategoryRow: View {
 }
 
 struct CategoryViewSheet: View {
-    let categoryId: String
+    let category: Category
     let ceremonyYear: String
+    let initialVote: Vote?
+    let hasActiveCompetition: Bool
+
     @Environment(\.dismiss) private var dismiss
-    @State private var category: Category?
     @State private var currentVote: Vote?
     @State private var selectedNomineeId: String?
     @State private var isVoting = false
     @State private var error: String?
     @State private var showVoteSuccess = false
-    @State private var hasActiveCompetition = false
     @State private var showJoinCompetitionPrompt = false
 
     private var canVote: Bool {
-        guard let category else { return false }
-        return !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
+        !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
     }
 
     private var votingDisabledReason: String? {
-        guard let category else { return nil }
         if category.hasWinner { return nil }
         if category.isVotingLocked { return nil }
-        if !hasActiveCompetition { return "Join a competition to vote on awards!" }
+        if !hasActiveCompetition {
+            return "Join a competition to vote on awards!"
+        }
         return nil
     }
 
@@ -258,124 +277,150 @@ struct CategoryViewSheet: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if let category {
-                    List {
-                        // Status Section
-                        if category.isVotingLocked && !category.hasWinner {
-                            Section {
-                                Label("Voting is locked for this category", systemImage: "lock.fill")
-                                    .foregroundStyle(.orange)
+            List {
+                // Status Section
+                if category.isVotingLocked && !category.hasWinner {
+                    Section {
+                        Label("Voting is locked for this category", systemImage: "lock.fill")
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                // Winner Section
+                if category.hasWinner, let winner = category.winner {
+                    Section {
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("Winner -")
+                                Image(systemName: "trophy.fill")
+                                    .foregroundStyle(.yellow)
+                                Text(winner.title)
                             }
-                        }
+                            .font(.headline)
+                            .fontWeight(.semibold)
 
-                        // Winner Section
-                        if category.hasWinner, let winner = category.winner {
-                            Section {
-                                VStack(spacing: 12) {
-                                    HStack {
-                                        Text("Winner -")
-                                        Image(systemName: "trophy.fill")
-                                            .foregroundStyle(.yellow)
-                                        Text(winner.title)
-                                    }
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-
-                                    if let subtitle = winner.subtitle {
-                                        Text(subtitle)
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                    }
-
-                                    if let url = URL(string: winner.imageUrl) {
-                                        KFImage(url)
-                                            .placeholder {
-                                                ProgressView()
-                                                    .frame(height: 200)
-                                            }
-                                            .fade(duration: 0.25)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(maxHeight: 250)
-                                            .cornerRadius(12)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 8)
-                            }
-                        }
-
-                        // Join Competition Prompt
-                        if let reason = votingDisabledReason {
-                            Section {
-                                VStack(spacing: 12) {
-                                    Image(systemName: "person.3.fill")
-                                        .font(.largeTitle)
-                                        .foregroundStyle(.blue)
-
-                                    Text(reason)
-                                        .font(.headline)
-                                        .multilineTextAlignment(.center)
-
-                                    Text("Create or join a competition with friends to start voting on the Oscars!")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .multilineTextAlignment(.center)
-
-                                    Button {
-                                        showJoinCompetitionPrompt = true
-                                    } label: {
-                                        Text("Go to Competitions")
-                                            .fontWeight(.semibold)
-                                            .frame(maxWidth: .infinity)
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                            }
-                        }
-
-                        // Nominees Section
-                        Section {
-                            if category.nominees.isEmpty {
-                                Text("No nominees available")
+                            if let subtitle = winner.subtitle {
+                                Text(subtitle)
+                                    .font(.subheadline)
                                     .foregroundStyle(.secondary)
-                            } else {
-                                ForEach(category.nominees) { nominee in
-                                    NomineeVoteRow(
-                                        nominee: nominee,
-                                        isSelected: selectedNomineeId == nominee.id,
-                                        isWinner: category.winnerId == nominee.id,
-                                        isLocked: !canVote,
-                                        onTap: {
-                                            if canVote {
-                                                withAnimation(.easeInOut(duration: 0.2)) {
-                                                    selectedNomineeId = nominee.id
-                                                }
-                                            }
-                                        }
-                                    )
-                                }
                             }
-                        } header: {
-                            Text(canVote ? "Select your prediction" : "Nominees")
-                        }
 
-                        // Error Section
-                        if let error {
-                            Section {
-                                Text(error)
-                                    .foregroundStyle(.red)
+                            if let url = URL(string: winner.imageUrl) {
+                                KFImage(url)
+                                    .placeholder {
+                                        ProgressView()
+                                            .frame(height: 200)
+                                    }
+                                    .fade(duration: 0.25)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxHeight: 250)
+                                    .cornerRadius(12)
                             }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                }
+
+                // Join Competition Prompt
+                if let reason = votingDisabledReason {
+                    Section {
+                        VStack(spacing: 12) {
+                            Image(systemName: "person.3.fill")
+                                .font(.largeTitle)
+                                .foregroundStyle(.blue)
+
+                            Text(reason)
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+
+                            Text("Create or join a competition with friends to start voting on the Oscars!")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            Button {
+                                showJoinCompetitionPrompt = true
+                            } label: {
+                                Text("Go to Competitions")
+                                    .fontWeight(.semibold)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    }
+                }
+
+                // Nominees Section
+                Section {
+                    if category.nominees.isEmpty {
+                        Text("No nominees available")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(category.nominees) { nominee in
+                            let isDefinitelyLocked = category.isVotingLocked || category.hasWinner || !hasActiveCompetition
+                            NomineeVoteRow(
+                                nominee: nominee,
+                                isSelected: selectedNomineeId == nominee.id,
+                                isWinner: category.winnerId == nominee.id,
+                                isLocked: isDefinitelyLocked,
+                                onTap: {
+                                    if !isDefinitelyLocked {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            selectedNomineeId = nominee.id
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
-                    .navigationTitle(category.name)
-                } else {
-                    ProgressView("Loading...")
+                    // Vote Button - inside the nominees section
+                    if canVote {
+                        Button {
+                            Task {
+                                await castVote()
+                            }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if isVoting {
+                                    ProgressView()
+                                        .tint(.white)
+                                } else {
+                                    Text(currentVote != nil ? "Update Prediction" : "Submit Prediction")
+                                        .fontWeight(.semibold)
+                                }
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .background(
+                                hasChanges && !isVoting
+                                    ? Color.blue
+                                    : Color.gray.opacity(0.4)
+                            )
+                            .foregroundStyle(.white)
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!hasChanges || isVoting)
+                        .listRowSeparator(.hidden)
+                    }
+                } header: {
+                    Text(canVote ? "Select your prediction" : "Nominees")
+                }
+
+                // Error Section
+                if let error {
+                    Section {
+                        Text(error)
+                            .foregroundStyle(.red)
+                    }
                 }
             }
+            .navigationTitle(category.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -383,28 +428,12 @@ struct CategoryViewSheet: View {
                         dismiss()
                     }
                 }
-
-                if canVote {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button {
-                            Task {
-                                await castVote()
-                            }
-                        } label: {
-                            if isVoting {
-                                ProgressView()
-                            } else {
-                                Text(currentVote != nil ? "Update" : "Vote")
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .disabled(!hasChanges || isVoting)
-                    }
-                }
             }
         }
-        .task {
-            await loadData()
+        .onAppear {
+            // Initialize from passed data
+            currentVote = initialVote
+            selectedNomineeId = initialVote?.nomineeId
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
         .alert("Join a Competition", isPresented: $showJoinCompetitionPrompt) {
@@ -419,57 +448,9 @@ struct CategoryViewSheet: View {
         }
     }
 
-    private func loadData() async {
-        // Listen for category updates
-        Task {
-            do {
-                for try await categories in FirestoreService.shared.categoriesStream(for: ceremonyYear) {
-                    if let cat = categories.first(where: { $0.id == categoryId }) {
-                        category = cat
-                    }
-                }
-            } catch {
-                self.error = error.localizedDescription
-            }
-        }
-
-        // Listen for vote updates
-        Task {
-            do {
-                for try await votes in FirestoreService.shared.myCeremonyVotesStream(ceremonyYear: ceremonyYear) {
-                    if let vote = votes[categoryId] {
-                        currentVote = vote
-                        if selectedNomineeId == nil {
-                            selectedNomineeId = vote.nomineeId
-                        }
-                    }
-                }
-            } catch {
-                // Handle silently
-            }
-        }
-
-        // Check for active competitions
-        Task {
-            await checkForActiveCompetitions()
-        }
-    }
-
-    private func checkForActiveCompetitions() async {
-        do {
-            for try await competitions in FirestoreService.shared.myCompetitionsStream() {
-                let activeForCeremony = competitions.filter {
-                    $0.ceremonyYear == ceremonyYear && $0.status == .open
-                }
-                hasActiveCompetition = !activeForCeremony.isEmpty
-            }
-        } catch {
-            // Handle silently
-        }
-    }
-
     private func castVote() async {
-        guard let nomineeId = selectedNomineeId else { return }
+        guard let nomineeId = selectedNomineeId,
+              let categoryId = category.id else { return }
 
         isVoting = true
         error = nil
@@ -481,6 +462,8 @@ struct CategoryViewSheet: View {
                 nomineeId: nomineeId
             )
             showVoteSuccess = true
+            // Brief delay to allow Firestore stream to propagate the update
+            try? await Task.sleep(for: .milliseconds(300))
             dismiss()
         } catch {
             self.error = error.localizedDescription
@@ -600,5 +583,66 @@ struct NomineeViewRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Previews
+
+#Preview("Category Vote Sheet") {
+    CategoryVoteSheetPreview()
+}
+
+private struct CategoryVoteSheetPreview: View {
+    @State private var selectedNomineeId: String? = nil
+
+    private let category = Category.preview(name: "Best Picture")
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(category.nominees) { nominee in
+                        NomineeVoteRow(
+                            nominee: nominee,
+                            isSelected: selectedNomineeId == nominee.id,
+                            isWinner: false,
+                            isLocked: false,
+                            onTap: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    selectedNomineeId = nominee.id
+                                }
+                            }
+                        )
+                    }
+
+                    Button {
+                        // Preview action
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Submit Prediction")
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
+                        .background(selectedNomineeId != nil ? Color.blue : Color.gray.opacity(0.4))
+                        .foregroundStyle(.white)
+                        .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(selectedNomineeId == nil)
+                    .listRowSeparator(.hidden)
+                } header: {
+                    Text("Select your prediction")
+                }
+            }
+            .navigationTitle("Best Picture")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {}
+                }
+            }
+        }
     }
 }

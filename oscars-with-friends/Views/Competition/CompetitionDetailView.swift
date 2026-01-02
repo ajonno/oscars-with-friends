@@ -52,7 +52,7 @@ struct CompetitionDetailView: View {
                         StatusBadge(status: competition.status)
                     }
 
-                    Text("\(competition.ceremonyYear) Academy Awards")
+                    Text("\(competition.ceremonyYear) \(competition.eventDisplayName)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 

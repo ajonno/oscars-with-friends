@@ -41,9 +41,6 @@ struct LeaderboardView: View {
         .task {
             await loadParticipants()
         }
-        .refreshable {
-            await loadParticipants()
-        }
     }
 
     private var leaderboardList: some View {

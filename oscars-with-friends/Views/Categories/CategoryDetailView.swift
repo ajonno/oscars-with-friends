@@ -35,6 +35,7 @@ struct CategoryDetailView: View {
                         ForEach(category.nominees) { nominee in
                             NomineeCard(
                                 nominee: nominee,
+                                categoryName: category.name,
                                 isSelected: selectedNomineeId == nominee.id,
                                 isWinner: category.winnerId == nominee.id,
                                 isLocked: category.isVotingLocked,
@@ -96,7 +97,7 @@ struct CategoryDetailView: View {
         // Listen for category updates
         Task {
             do {
-                for try await categories in FirestoreService.shared.categoriesStream(for: competition.ceremonyYear) {
+                for try await categories in FirestoreService.shared.categoriesStream(for: competition.ceremonyYear, event: competition.event) {
                     if let cat = categories.first(where: { $0.id == categoryId }) {
                         category = cat
                     }
@@ -151,10 +152,24 @@ struct CategoryDetailView: View {
 
 struct NomineeCard: View {
     let nominee: Nominee
+    let categoryName: String
     let isSelected: Bool
     let isWinner: Bool
     let isLocked: Bool
     let onTap: () -> Void
+
+    // Placeholder images hosted on Firebase
+    private static let personPlaceholder = URL(string: "https://oscars-with-friends.web.app/placeholders/person.svg")!
+    private static let moviePlaceholder = URL(string: "https://oscars-with-friends.web.app/placeholders/movie.svg")!
+
+    private var isPeopleCategory: Bool {
+        let lowercased = categoryName.lowercased()
+        return lowercased.contains("actor") ||
+               lowercased.contains("actress") ||
+               lowercased.contains("director") ||
+               lowercased.contains("performer") ||
+               lowercased.contains("supporting")
+    }
 
     var body: some View {
         Button(action: onTap) {
@@ -165,18 +180,7 @@ struct NomineeCard: View {
                     .font(.title2)
 
                 // Nominee image
-                if let url = URL(string: nominee.imageUrl) {
-                    KFImage(url)
-                        .placeholder {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.gray.opacity(0.2))
-                        }
-                        .fade(duration: 0.25)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 70)
-                        .cornerRadius(6)
-                }
+                nomineeImage
 
                 // Nominee info
                 VStack(alignment: .leading, spacing: 4) {
@@ -211,5 +215,26 @@ struct NomineeCard: View {
         .buttonStyle(.plain)
         .disabled(isLocked)
         .opacity(isLocked && !isSelected && !isWinner ? 0.6 : 1)
+    }
+
+    @ViewBuilder
+    private var nomineeImage: some View {
+        let imageUrl: URL = {
+            if !nominee.imageUrl.isEmpty, let url = URL(string: nominee.imageUrl) {
+                return url
+            }
+            return isPeopleCategory ? Self.personPlaceholder : Self.moviePlaceholder
+        }()
+
+        KFImage(imageUrl)
+            .placeholder {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.gray.opacity(0.2))
+            }
+            .fade(duration: 0.25)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 50, height: 70)
+            .cornerRadius(6)
     }
 }

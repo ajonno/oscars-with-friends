@@ -14,6 +14,7 @@ struct Competition: Codable, Identifiable, Hashable {
     let name: String
     let createdBy: String
     let ceremonyYear: String
+    let event: String?
     let inviteCode: String
     let participantCount: Int
     let status: CompetitionStatus
@@ -29,12 +30,17 @@ struct Competition: Codable, Identifiable, Hashable {
         status == .open || status == .locked
     }
 
+    var eventDisplayName: String {
+        EventTypeCache.shared.displayName(for: event)
+    }
+
     func withStatus(_ newStatus: CompetitionStatus) -> Competition {
         Competition(
             id: id,
             name: name,
             createdBy: createdBy,
             ceremonyYear: ceremonyYear,
+            event: event,
             inviteCode: inviteCode,
             participantCount: participantCount,
             status: newStatus,
@@ -44,12 +50,13 @@ struct Competition: Codable, Identifiable, Hashable {
         )
     }
 
-    static func preview(name: String = "Oscar Pool 2026", status: CompetitionStatus = .open) -> Competition {
+    static func preview(name: String = "Oscar Pool 2026", event: String = "oscars", status: CompetitionStatus = .open) -> Competition {
         Competition(
             id: UUID().uuidString,
             name: name,
             createdBy: "user123",
             ceremonyYear: "2026",
+            event: event,
             inviteCode: "ABC123",
             participantCount: 5,
             status: status,

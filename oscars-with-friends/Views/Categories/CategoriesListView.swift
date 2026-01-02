@@ -67,7 +67,7 @@ struct CategoriesListView: View {
         // Listen for categories
         Task {
             do {
-                for try await updatedCategories in FirestoreService.shared.categoriesStream(for: competition.ceremonyYear) {
+                for try await updatedCategories in FirestoreService.shared.categoriesStream(for: competition.ceremonyYear, event: competition.event) {
                     categories = updatedCategories.sorted { $0.displayOrder < $1.displayOrder }
                     if isLoading {
                         isLoading = false

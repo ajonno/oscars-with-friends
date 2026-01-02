@@ -22,6 +22,9 @@ struct oscars_with_friendsApp: App {
         WindowGroup {
             ContentView()
                 .environment(authService)
+                .task {
+                    await EventTypeCache.shared.load()
+                }
         }
     }
 }

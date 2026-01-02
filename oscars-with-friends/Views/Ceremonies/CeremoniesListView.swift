@@ -57,6 +57,11 @@ struct CeremoniesListView: View {
 
 struct CeremonyRow: View {
     let ceremony: Ceremony
+    @State private var fetchedCategoryCount: Int?
+
+    private var categoryCount: Int? {
+        ceremony.categoryCount ?? fetchedCategoryCount
+    }
 
     var body: some View {
         HStack(spacing: 16) {
@@ -69,25 +74,49 @@ struct CeremonyRow: View {
                 Text(ceremony.name)
                     .font(.headline)
 
+                Text(ceremony.eventDisplayName)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
                 if let date = ceremony.date {
                     Text(date.dateValue(), style: .date)
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
                 HStack(spacing: 12) {
-                    if let count = ceremony.categoryCount {
-                        Label("\(count) categories", systemImage: "list.bullet")
+                    if let count = categoryCount {
+                        Text("\(count) categories")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .fixedSize()
                     }
 
-                    statusBadge
-                }
-            }
+                    Spacer()
 
+                    statusBadge
+                        .fixedSize()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .padding(.vertical, 8)
+        .task {
+            // Listen for category count in real-time if not stored on ceremony
+            if ceremony.categoryCount == nil, let eventId = ceremony.event {
+                do {
+                    for try await categories in FirestoreService.shared.categoriesStream(
+                        for: ceremony.year,
+                        event: eventId
+                    ) {
+                        fetchedCategoryCount = categories.count
+                    }
+                } catch {
+                    // Silently fail - just won't show count
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -120,6 +149,25 @@ struct CeremonyRow: View {
                 .background(Color.green.opacity(0.2))
                 .foregroundStyle(.green)
                 .cornerRadius(4)
+        }
+    }
+}
+
+#Preview("Ceremonies List") {
+    CeremoniesListPreview()
+}
+
+private struct CeremoniesListPreview: View {
+    var body: some View {
+        NavigationStack {
+            List(Ceremony.previewList) { ceremony in
+                NavigationLink {
+                    Text(ceremony.name)
+                } label: {
+                    CeremonyRow(ceremony: ceremony)
+                }
+            }
+            .navigationTitle("Ceremonies")
         }
     }
 }

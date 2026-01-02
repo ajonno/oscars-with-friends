@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		EF368C5B2F068D3B00612459 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = EF368C5A2F068D3B00612459 /* Kingfisher */; };
+		EF368C5D2F07619800612459 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF368C5C2F07619800612459 /* EventType.swift */; };
 		EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */; };
 		EFEEBD162F06704A0072649D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF72F06704A0072649D /* AuthService.swift */; };
 		EFEEBD172F06704A0072649D /* oscars_with_friendsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF22F06704A0072649D /* oscars_with_friendsApp.swift */; };
@@ -46,6 +47,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
 		EFEEBCD72F066F9F0072649D /* oscars-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "oscars-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFEEBCE52F06704A0072649D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EFEEBCEB2F06704A0072649D /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 		EFEEBCF12F06704A0072649D /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				EF368C5C2F07619800612459 /* EventType.swift */,
 				EFEEBCEB2F06704A0072649D /* Category.swift */,
 				EFEEBCEC2F06704A0072649D /* Ceremony.swift */,
 				EFEEBCED2F06704A0072649D /* Competition.swift */,
@@ -359,6 +362,7 @@
 				EFEEBD202F06704A0072649D /* CategoriesListView.swift in Sources */,
 				EFEEBD212F06704A0072649D /* HomeView.swift in Sources */,
 				EFEEBD222F06704A0072649D /* Category.swift in Sources */,
+				EF368C5D2F07619800612459 /* EventType.swift in Sources */,
 				EFEEBD232F06704A0072649D /* CategoryDetailView.swift in Sources */,
 				EFEEBD242F06704A0072649D /* Ceremony.swift in Sources */,
 				EFEEBD252F06704A0072649D /* Competition.swift in Sources */,
