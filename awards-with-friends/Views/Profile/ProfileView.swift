@@ -12,9 +12,18 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                // User Info Section
-                Section {
+            VStack(spacing: 0) {
+                Text("Profile")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+
+                List {
+                    // User Info Section
+                    Section {
                     HStack(spacing: 16) {
                         // Avatar
                         if let photoURL = user?.photoURL {
@@ -94,8 +103,9 @@ struct ProfileView: View {
                         Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                     }
                 }
+                }
             }
-            .navigationTitle("Profile")
+            .toolbar(.hidden, for: .navigationBar)
             .confirmationDialog(
                 "Sign Out",
                 isPresented: $showSignOutConfirmation,

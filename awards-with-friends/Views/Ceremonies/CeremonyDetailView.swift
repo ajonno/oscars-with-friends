@@ -109,6 +109,8 @@ struct CeremonyDetailView: View {
                 }
             }
         }
+        .contentMargins(.top, 10, for: .scrollContent)
+        .listSectionSpacing(20)
     }
 
     private func loadData() async {
@@ -422,6 +424,7 @@ struct CategoryViewSheet: View {
             }
             .navigationTitle(category.name)
             .navigationBarTitleDisplayMode(.inline)
+            .contentMargins(.top, category.hasWinner ? 8 : -10, for: .scrollContent)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {

@@ -65,36 +65,38 @@ struct CompetitionDetailView: View {
                 .padding(.vertical, 4)
             }
 
-            // Invite Code Section
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Invite Code")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            // Invite Code Section (only visible to owner)
+            if isOwner {
+                Section {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Invite Code")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
 
-                        Text(competition.inviteCode)
-                            .font(.system(size: 24, weight: .bold, design: .monospaced))
+                            Text(competition.inviteCode)
+                                .font(.system(size: 24, weight: .bold, design: .monospaced))
+                        }
+
+                        Spacer()
+
+                        Button {
+                            UIPasteboard.general.string = competition.inviteCode
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .buttonStyle(.bordered)
+
+                        ShareLink(
+                            item: "Join my Oscar predictions competition! Use code: \(competition.inviteCode)"
+                        ) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .buttonStyle(.bordered)
                     }
-
-                    Spacer()
-
-                    Button {
-                        UIPasteboard.general.string = competition.inviteCode
-                    } label: {
-                        Image(systemName: "doc.on.doc")
-                    }
-                    .buttonStyle(.bordered)
-
-                    ShareLink(
-                        item: "Join my Oscar predictions competition! Use code: \(competition.inviteCode)"
-                    ) {
-                        Image(systemName: "square.and.arrow.up")
-                    }
-                    .buttonStyle(.bordered)
+                } footer: {
+                    Text("Share this code with friends to invite them")
                 }
-            } footer: {
-                Text("Share this code with friends to invite them")
             }
 
             // Actions Section
@@ -152,6 +154,8 @@ struct CompetitionDetailView: View {
                 }
             }
         }
+        .contentMargins(.top, 10, for: .scrollContent)
+        .listSectionSpacing(10)
         .navigationTitle("Competition")
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(

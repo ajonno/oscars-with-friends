@@ -157,3 +157,45 @@ struct CategoryRow: View {
         }
     }
 }
+
+#Preview("Categories List") {
+    CategoriesListPreview()
+}
+
+private struct CategoriesListPreview: View {
+    private let sampleCategories: [Category] = [
+        Category.preview(name: "Best Picture"),
+        Category.preview(name: "Best Director"),
+        Category.preview(name: "Best Actor"),
+        Category.preview(name: "Best Actress"),
+        Category.preview(name: "Best Supporting Actor"),
+        Category.preview(name: "Best Supporting Actress"),
+    ]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(sampleCategories) { category in
+                    NavigationLink {
+                        Text(category.name)
+                    } label: {
+                        CategoryRow(category: category, vote: nil)
+                    }
+                }
+            }
+            .navigationTitle("Vote")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack {
+                        Text("Vote")
+                            .font(.headline)
+                        Text("0/\(sampleCategories.count) predictions")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}

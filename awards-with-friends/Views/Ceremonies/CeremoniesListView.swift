@@ -87,7 +87,7 @@ struct CeremoniesListView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .contentMargins(.top, 0, for: .scrollContent)
+        .contentMargins(.top, 8, for: .scrollContent)
     }
 
     private func loadCeremonies() async {

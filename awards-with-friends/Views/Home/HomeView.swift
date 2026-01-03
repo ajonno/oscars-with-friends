@@ -15,6 +15,7 @@ struct HomeView: View {
     @State private var showJoinCompetition = false
     @State private var selectedCompetition: Competition?
     @State private var leaderboardCompetition: Competition?
+    @State private var shareCompetition: Competition?
     @State private var error: String?
     @State private var filter: CompetitionFilter = .all
     @State private var refreshTrigger = UUID()
@@ -64,6 +65,35 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                HStack {
+                    Text("Competitions")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    Spacer()
+
+                    Menu {
+                        Button {
+                            showCreateCompetition = true
+                        } label: {
+                            Label("Create Competition", systemImage: "plus.circle")
+                        }
+
+                        Button {
+                            showJoinCompetition = true
+                        } label: {
+                            Label("Join Competition", systemImage: "person.badge.plus")
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                            .foregroundStyle(.blue)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+
                 if !competitions.isEmpty {
                     Picker("Filter", selection: $filter) {
                         ForEach(CompetitionFilter.allCases, id: \.self) { option in
@@ -89,27 +119,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .navigationTitle("Competitions")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            showCreateCompetition = true
-                        } label: {
-                            Label("Create Competition", systemImage: "plus.circle")
-                        }
-
-                        Button {
-                            showJoinCompetition = true
-                        } label: {
-                            Label("Join Competition", systemImage: "person.badge.plus")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showCreateCompetition) {
                 CreateCompetitionView()
             }
@@ -131,6 +141,10 @@ struct HomeView: View {
             }
             .navigationDestination(item: $leaderboardCompetition) { competition in
                 LeaderboardView(competition: competition)
+            }
+            .sheet(item: $shareCompetition) { competition in
+                InviteSheet(competition: competition)
+                    .presentationDetents([.medium])
             }
             .task(id: refreshTrigger) {
                 await loadCompetitions()
@@ -184,8 +198,12 @@ struct HomeView: View {
             CompetitionCard(
                 competition: competition,
                 isDisabled: !isTappable,
+                isOwner: competition.createdBy == currentUserId,
                 onLeaderboardTap: {
                     leaderboardCompetition = competition
+                },
+                onShareTap: {
+                    shareCompetition = competition
                 }
             )
             .contentShape(Rectangle())
@@ -214,6 +232,92 @@ struct HomeView: View {
             isLoading = false
         }
     }
+}
+
+struct InviteSheet: View {
+    let competition: Competition
+    @Environment(\.dismiss) private var dismiss
+    @State private var showShareSheet = false
+
+    private var inviteMessage: String {
+        "Join my \(competition.eventDisplayName) predictions competition!\n\nUse invite code: \(competition.inviteCode)\n\nDownload the app to compete with friends and predict the winners!"
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "person.badge.plus")
+                        .font(.system(size: 50))
+                        .foregroundStyle(.blue)
+
+                    Text("Invite Friends")
+                        .font(.title2)
+                        .fontWeight(.bold)
+
+                    Text("Share this competition with friends so they can join and compete!")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top)
+
+                // Invite Code Card
+                VStack(spacing: 8) {
+                    Text("Invite Code")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Text(competition.inviteCode)
+                        .font(.system(size: 32, weight: .bold, design: .monospaced))
+                        .foregroundStyle(.primary)
+
+                    Button {
+                        UIPasteboard.general.string = competition.inviteCode
+                    } label: {
+                        Label("Copy Code", systemImage: "doc.on.doc")
+                            .font(.subheadline)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(12)
+
+                // Share Button
+                ShareLink(item: inviteMessage) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Share Invite")
+                    }
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundStyle(.white)
+                    .cornerRadius(12)
+                }
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle(competition.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Preview("Invite Sheet") {
+    InviteSheet(competition: Competition.preview())
 }
 
 #Preview("Home View") {
