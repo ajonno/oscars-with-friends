@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		EF368C5B2F068D3B00612459 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = EF368C5A2F068D3B00612459 /* Kingfisher */; };
 		EF368C5D2F07619800612459 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF368C5C2F07619800612459 /* EventType.swift */; };
+		EF8896652F08AB9200A7DADF /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896642F08AB9200A7DADF /* StoreService.swift */; };
+		EF8896662F08AB9200A7DADF /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896632F08AB9200A7DADF /* ConfigService.swift */; };
+		EF8896682F08ABB300A7DADF /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896672F08ABB300A7DADF /* PaywallView.swift */; };
+		EF88966A2F08AE4E00A7DADF /* products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = EF8896692F08AE4E00A7DADF /* products.storekit */; };
 		EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */; };
 		EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */; };
 		EFEEBD162F06704A0072649D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF72F06704A0072649D /* AuthService.swift */; };
@@ -48,6 +52,10 @@
 
 /* Begin PBXFileReference section */
 		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
+		EF8896632F08AB9200A7DADF /* ConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
+		EF8896642F08AB9200A7DADF /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
+		EF8896672F08ABB300A7DADF /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		EF8896692F08AE4E00A7DADF /* products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = products.storekit; sourceTree = SOURCE_ROOT; };
 		EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EFD406D62F07B00000E90E71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EFEEBCD72F066F9F0072649D /* awards-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "awards-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,6 +114,7 @@
 				EFD406D62F07B00000E90E71 /* Info.plist */,
 				EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */,
 				EFEEBD432F0679DD0072649D /* Media.xcassets */,
+				EF8896692F08AE4E00A7DADF /* products.storekit */,
 				EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */,
 				EFEEBCE72F06704A0072649D /* App */,
 				EFEEBCF12F06704A0072649D /* Models */,
@@ -150,6 +159,8 @@
 		EFEEBCFB2F06704A0072649D /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				EF8896632F08AB9200A7DADF /* ConfigService.swift */,
+				EF8896642F08AB9200A7DADF /* StoreService.swift */,
 				EFEEBCF72F06704A0072649D /* AuthService.swift */,
 				EFEEBCF82F06704A0072649D /* CloudFunctionsService.swift */,
 				EFEEBCF92F06704A0072649D /* FirestoreService.swift */,
@@ -189,6 +200,7 @@
 		EFEEBD092F06704A0072649D /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				EF8896672F08ABB300A7DADF /* PaywallView.swift */,
 				EFEEBD072F06704A0072649D /* CompetitionCard.swift */,
 				EFEEBD082F06704A0072649D /* HomeView.swift */,
 			);
@@ -316,6 +328,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF88966A2F08AE4E00A7DADF /* products.storekit in Resources */,
 				EFEEBD442F0679DD0072649D /* Media.xcassets in Resources */,
 				EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */,
 			);
@@ -335,7 +348,10 @@
 				EFEEBD192F06704A0072649D /* Participant.swift in Sources */,
 				EFEEBD1A2F06704A0072649D /* Vote.swift in Sources */,
 				EFEEBD1C2F06704A0072649D /* SignUpView.swift in Sources */,
+				EF8896682F08ABB300A7DADF /* PaywallView.swift in Sources */,
 				EFEEBD1D2F06704A0072649D /* NotificationService.swift in Sources */,
+				EF8896652F08AB9200A7DADF /* StoreService.swift in Sources */,
+				EF8896662F08AB9200A7DADF /* ConfigService.swift in Sources */,
 				EFEEBD1E2F06704A0072649D /* ContentView.swift in Sources */,
 				EFEEBD1F2F06704A0072649D /* CreateCompetitionView.swift in Sources */,
 				EFEEBD202F06704A0072649D /* CategoriesListView.swift in Sources */,

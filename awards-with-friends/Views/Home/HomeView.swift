@@ -13,12 +13,25 @@ struct HomeView: View {
     @State private var isLoading = true
     @State private var showCreateCompetition = false
     @State private var showJoinCompetition = false
+    @State private var showPaywall = false
     @State private var selectedCompetition: Competition?
     @State private var leaderboardCompetition: Competition?
     @State private var shareCompetition: Competition?
     @State private var error: String?
     @State private var filter: CompetitionFilter = .all
     @State private var refreshTrigger = UUID()
+
+    private var storeService: StoreService { StoreService.shared }
+    private var configService: ConfigService { ConfigService.shared }
+
+    private var canAccessCompetitions: Bool {
+        // If payment is not required, always allow
+        if !configService.requiresPaymentForCompetitions {
+            return true
+        }
+        // Otherwise check if user has purchased
+        return storeService.hasCompetitionsAccess
+    }
 
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
@@ -74,13 +87,21 @@ struct HomeView: View {
 
                     Menu {
                         Button {
-                            showCreateCompetition = true
+                            if canAccessCompetitions {
+                                showCreateCompetition = true
+                            } else {
+                                showPaywall = true
+                            }
                         } label: {
                             Label("Create Competition", systemImage: "plus.circle")
                         }
 
                         Button {
-                            showJoinCompetition = true
+                            if canAccessCompetitions {
+                                showJoinCompetition = true
+                            } else {
+                                showPaywall = true
+                            }
                         } label: {
                             Label("Join Competition", systemImage: "person.badge.plus")
                         }
@@ -146,6 +167,9 @@ struct HomeView: View {
                 InviteSheet(competition: competition)
                     .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
             .task(id: refreshTrigger) {
                 await loadCompetitions()
             }
@@ -160,12 +184,20 @@ struct HomeView: View {
         } actions: {
             HStack(spacing: 16) {
                 Button("Create") {
-                    showCreateCompetition = true
+                    if canAccessCompetitions {
+                        showCreateCompetition = true
+                    } else {
+                        showPaywall = true
+                    }
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Join") {
-                    showJoinCompetition = true
+                    if canAccessCompetitions {
+                        showJoinCompetition = true
+                    } else {
+                        showPaywall = true
+                    }
                 }
                 .buttonStyle(.bordered)
             }
@@ -181,10 +213,14 @@ struct HomeView: View {
                  : "You haven't joined any competitions from others")
         } actions: {
             Button(filter == .mine ? "Create Competition" : "Join Competition") {
-                if filter == .mine {
-                    showCreateCompetition = true
+                if canAccessCompetitions {
+                    if filter == .mine {
+                        showCreateCompetition = true
+                    } else {
+                        showJoinCompetition = true
+                    }
                 } else {
-                    showJoinCompetition = true
+                    showPaywall = true
                 }
             }
             .buttonStyle(.borderedProminent)
