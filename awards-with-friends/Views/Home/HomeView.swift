@@ -240,7 +240,7 @@ struct InviteSheet: View {
     @State private var showShareSheet = false
 
     private var inviteMessage: String {
-        "Join my \(competition.eventDisplayName) predictions competition!\n\nUse invite code: \(competition.inviteCode)\n\nDownload the app to compete with friends and predict the winners!"
+        "Join my \(competition.eventDisplayName) competition!\n\nUse invite code: \(competition.inviteCode)\n\nDownload Awards With Friends:\nhttps://apps.apple.com/app/id1638720136"
     }
 
     var body: some View {
