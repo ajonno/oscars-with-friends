@@ -19,6 +19,7 @@ struct CeremonyDetailView: View {
     @State private var isLoading = true
     @State private var error: String?
     @State private var selectedCategory: Category?
+    @State private var showInviteSheet = false
 
     // Show votes if user has ANY competition for this ceremony (not just open ones)
     private var activeVotes: [String: Vote] {
@@ -57,7 +58,16 @@ struct CeremonyDetailView: View {
                     }
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showInviteSheet = true
+                } label: {
+                    Image(systemName: "person.2")
+                        .foregroundStyle(.blue)
+                }
+            }
         }
+        .inviteFriendsSheet(isPresented: $showInviteSheet)
         .task {
             await loadData()
         }
@@ -258,7 +268,6 @@ struct CategoryViewSheet: View {
     @State private var isVoting = false
     @State private var error: String?
     @State private var showVoteSuccess = false
-    @State private var showJoinCompetitionPrompt = false
 
     private var canVote: Bool {
         !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
@@ -343,7 +352,8 @@ struct CategoryViewSheet: View {
                                 .multilineTextAlignment(.center)
 
                             Button {
-                                showJoinCompetitionPrompt = true
+                                dismiss()
+                                NotificationCenter.default.post(name: .switchToCompetitionsTab, object: nil)
                             } label: {
                                 Text("Go to Competitions")
                                     .fontWeight(.semibold)
@@ -424,7 +434,7 @@ struct CategoryViewSheet: View {
             }
             .navigationTitle(category.name)
             .navigationBarTitleDisplayMode(.inline)
-            .contentMargins(.top, category.hasWinner ? 8 : -10, for: .scrollContent)
+            .contentMargins(.top, category.hasWinner || votingDisabledReason != nil ? 8 : -10, for: .scrollContent)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {
@@ -439,16 +449,6 @@ struct CategoryViewSheet: View {
             selectedNomineeId = initialVote?.nomineeId
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
-        .alert("Join a Competition", isPresented: $showJoinCompetitionPrompt) {
-            Button("Go to Competitions") {
-                dismiss()
-                // Post notification to switch to competitions tab
-                NotificationCenter.default.post(name: .switchToCompetitionsTab, object: nil)
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("To make predictions, you need to create or join a competition first.")
-        }
     }
 
     private func castVote() async {

@@ -8,7 +8,7 @@ struct CompetitionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showLeaveConfirmation = false
     @State private var isLeaving = false
-    @State private var showShareSheet = false
+    @State private var showInviteSheet = false
     @State private var showInactiveConfirmation = false
     @State private var isTogglingInactive = false
 
@@ -158,6 +158,19 @@ struct CompetitionDetailView: View {
         .listSectionSpacing(10)
         .navigationTitle("Competition")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !isOwner {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showInviteSheet = true
+                    } label: {
+                        Image(systemName: "person.2")
+                            .foregroundStyle(.blue)
+                    }
+                }
+            }
+        }
+        .inviteFriendsSheet(isPresented: $showInviteSheet)
         .confirmationDialog(
             "Leave Competition",
             isPresented: $showLeaveConfirmation,

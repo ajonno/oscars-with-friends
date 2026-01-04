@@ -39,9 +39,14 @@ class StoreService {
     func loadProducts() async {
         isLoading = true
         do {
+            print("[StoreService] Loading product: \(Self.competitionsProductId)")
             products = try await Product.products(for: [Self.competitionsProductId])
+            print("[StoreService] Loaded \(products.count) products: \(products.map { $0.id })")
+            if products.isEmpty {
+                print("[StoreService] ⚠️ No products found! Ensure the product exists in App Store Connect with ID: \(Self.competitionsProductId)")
+            }
         } catch {
-            print("Failed to load products: \(error)")
+            print("[StoreService] ❌ Failed to load products: \(error)")
         }
         isLoading = false
     }
@@ -49,8 +54,10 @@ class StoreService {
     @MainActor
     func purchase() async throws -> Bool {
         guard let product = competitionsProduct else {
+            print("[StoreService] ❌ Purchase failed: competitionsProduct is nil. Products loaded: \(products.count)")
             throw StoreError.productNotFound
         }
+        print("[StoreService] Starting purchase for: \(product.id)")
 
         let result = try await product.purchase()
 

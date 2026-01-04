@@ -182,25 +182,36 @@ struct HomeView: View {
         } description: {
             Text("Create a new competition or join one with an invite code")
         } actions: {
-            HStack(spacing: 16) {
-                Button("Create") {
+            VStack(spacing: 12) {
+                Button {
                     if canAccessCompetitions {
                         showCreateCompetition = true
                     } else {
                         showPaywall = true
                     }
+                } label: {
+                    Text("Create Competition")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button("Join") {
+                Button {
                     if canAccessCompetitions {
                         showJoinCompetition = true
                     } else {
                         showPaywall = true
                     }
+                } label: {
+                    Text("Join Competition")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
                 }
                 .buttonStyle(.bordered)
             }
+            .padding(.horizontal, 40)
         }
     }
 

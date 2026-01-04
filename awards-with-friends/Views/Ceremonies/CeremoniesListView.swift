@@ -6,6 +6,7 @@ struct CeremoniesListView: View {
     @State private var isLoading = true
     @State private var error: String?
     @State private var selectedEvent: String? = nil
+    @State private var showInviteSheet = false
 
     private var eventNames: [String] {
         let names = Set(ceremonies.map { $0.eventDisplayName })
@@ -20,13 +21,25 @@ struct CeremoniesListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Text("Award Ceremonies")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 8)
+                HStack {
+                    Text("Award Ceremonies")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    Spacer()
+
+                    Button {
+                        showInviteSheet = true
+                    } label: {
+                        Image(systemName: "person.2")
+                            .font(.title2)
+                            .foregroundStyle(.blue)
+                    }
+                    .offset(y: 3)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
 
                 if !ceremonies.isEmpty {
                     eventFilter
@@ -53,6 +66,7 @@ struct CeremoniesListView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .inviteFriendsSheet(isPresented: $showInviteSheet)
         }
         .task {
             await loadCeremonies()
@@ -223,6 +237,101 @@ struct FilterChip: View {
         .buttonStyle(.plain)
     }
 }
+
+// MARK: - Invite Friends Component
+
+struct InviteFriendsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var showShareSheet: Bool
+
+    var body: some View {
+        VStack(spacing: 24) {
+            HStack(alignment: .bottom, spacing: 4) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.6))
+                    .frame(width: 28, height: 40)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.yellow)
+                    .frame(width: 28, height: 56)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.orange.opacity(0.7))
+                    .frame(width: 28, height: 28)
+            }
+            .padding(.top, 8)
+
+            VStack(spacing: 12) {
+                Text("Invite Your Friends")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text("Awards With Friends is more fun with friends! Share the app and start competing to see who can predict the most winners.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
+            VStack(spacing: 12) {
+                Button {
+                    dismiss()
+                    showShareSheet = true
+                } label: {
+                    Text("Invite")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundStyle(.white)
+                        .cornerRadius(12)
+                }
+
+                Button("Cancel", role: .cancel) {
+                    dismiss()
+                }
+                .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+        }
+    }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+struct InviteFriendsModifier: ViewModifier {
+    @Binding var showInviteSheet: Bool
+    @State private var showShareSheet = false
+
+    private let shareMessage = "Hey! I just installed Awards With Friends. You should grab it too so we can compete!\n\nhttps://apps.apple.com/app/id1638720136"
+
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $showInviteSheet) {
+                InviteFriendsSheet(showShareSheet: $showShareSheet)
+                    .presentationDetents([.fraction(0.45)])
+            }
+            .sheet(isPresented: $showShareSheet) {
+                ShareSheet(items: [shareMessage])
+                    .presentationDetents([.medium])
+            }
+    }
+}
+
+extension View {
+    func inviteFriendsSheet(isPresented: Binding<Bool>) -> some View {
+        modifier(InviteFriendsModifier(showInviteSheet: isPresented))
+    }
+}
+
+// MARK: - Previews
 
 #Preview("Ceremonies List") {
     CeremoniesListPreview()
