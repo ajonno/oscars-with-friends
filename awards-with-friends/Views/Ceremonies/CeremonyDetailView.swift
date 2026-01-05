@@ -182,9 +182,9 @@ struct BrowseCategoryRow: View {
     let category: Category
     let vote: Vote?
 
-    private var votedNomineeTitle: String? {
+    private var votedNominee: Nominee? {
         guard let vote else { return nil }
-        return category.nominees.first { $0.id == vote.nomineeId }?.title
+        return category.nominees.first { $0.id == vote.nomineeId }
     }
 
     var body: some View {
@@ -194,14 +194,21 @@ struct BrowseCategoryRow: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                if let votedNomineeTitle {
+                if let votedNominee {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.blue)
-                        Text("Your pick: \(votedNomineeTitle)")
+                        Text("Your pick: \(votedNominee.title)")
                             .foregroundStyle(.blue)
                     }
                     .font(.caption)
+
+                    if let subtitle = votedNominee.subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.leading, 20)
+                    }
                 } else {
                     Text("\(category.nominees.count) nominees")
                         .font(.caption)
