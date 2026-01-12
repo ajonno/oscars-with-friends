@@ -177,7 +177,7 @@ final class FirestoreService {
 
                     let participants = documents.compactMap { doc -> Participant? in
                         try? doc.data(as: Participant.self)
-                    }
+                    }.filter { $0.blocked != true }
 
                     continuation.yield(participants)
                 }

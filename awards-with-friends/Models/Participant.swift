@@ -9,6 +9,7 @@ struct Participant: Codable, Identifiable {
     let score: Int
     let joinedAt: Timestamp
     let lastVotedAt: Timestamp?
+    let blocked: Bool?
 
     var odUserIdValue: String {
         id ?? odUserId
@@ -22,7 +23,8 @@ struct Participant: Codable, Identifiable {
             photoUrl: nil,
             score: score,
             joinedAt: Timestamp(date: Date()),
-            lastVotedAt: nil
+            lastVotedAt: nil,
+            blocked: false
         )
     }
 }

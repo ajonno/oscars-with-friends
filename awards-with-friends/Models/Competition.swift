@@ -27,7 +27,7 @@ struct Competition: Codable, Identifiable, Hashable {
     }
 
     var canVote: Bool {
-        status == .open || status == .locked
+        status == .open
     }
 
     var eventDisplayName: String {

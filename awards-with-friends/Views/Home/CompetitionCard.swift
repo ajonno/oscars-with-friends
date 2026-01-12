@@ -122,7 +122,7 @@ extension CompetitionStatus {
     var displayName: String {
         switch self {
         case .open: return "Open"
-        case .locked: return "Locked"
+        case .locked: return "Voting Closed"
         case .complete: return "Complete"
         case .closed: return "Closed"
         case .inactive: return "Inactive"
