@@ -13,7 +13,8 @@ class StoreService {
     private(set) var isLoading = false
 
     var hasCompetitionsAccess: Bool {
-        purchasedProductIds.contains(Self.competitionsProductId)
+        // IAP disabled - grant access to all users
+        true
     }
 
     var competitionsProduct: Product? {
@@ -23,12 +24,12 @@ class StoreService {
     private var updateListenerTask: Task<Void, Error>?
 
     init() {
-        updateListenerTask = listenForTransactions()
-
-        Task {
-            await loadProducts()
-            await updatePurchasedProducts()
-        }
+        // IAP disabled - don't load products or listen for transactions
+        // updateListenerTask = listenForTransactions()
+        // Task {
+        //     await loadProducts()
+        //     await updatePurchasedProducts()
+        // }
     }
 
     deinit {
