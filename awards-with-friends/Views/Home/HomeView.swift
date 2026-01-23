@@ -53,25 +53,22 @@ struct HomeView: View {
     }
 
     private var sortedCompetitions: [Competition] {
-        competitions.sorted { comp1, comp2 in
-            // Inactive competitions go to the bottom
-            if comp1.status == .inactive && comp2.status != .inactive {
-                return false
-            }
-            if comp1.status != .inactive && comp2.status == .inactive {
+        competitions
+            .filter { competition in
+                // Hide inactive competitions unless you're the owner
+                if competition.status == .inactive {
+                    return competition.createdBy == currentUserId
+                }
                 return true
             }
-            // Otherwise sort by creation date (newest first)
-            return comp1.createdAt.dateValue() > comp2.createdAt.dateValue()
-        }
+            .sorted { comp1, comp2 in
+                // Sort by creation date (newest first)
+                comp1.createdAt.dateValue() > comp2.createdAt.dateValue()
+            }
     }
 
     private func isCompetitionTappable(_ competition: Competition) -> Bool {
-        guard let userId = currentUserId else { return false }
-        // Inactive competitions can only be tapped by the owner
-        if competition.status == .inactive {
-            return competition.createdBy == userId
-        }
+        // All visible competitions are tappable
         return true
     }
 

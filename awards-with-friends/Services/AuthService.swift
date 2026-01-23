@@ -129,6 +129,23 @@ final class AuthService {
         }
     }
 
+    // MARK: - Delete Account
+
+    func deleteAccount() async throws {
+        guard Auth.auth().currentUser != nil else {
+            throw NSError(domain: "AuthService", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user signed in"])
+        }
+
+        // Delete all user data and Firebase Auth account via cloud function
+        // The cloud function uses Admin SDK to delete the auth account,
+        // which avoids the "requires recent authentication" issue
+        try await CloudFunctionsService.shared.deleteAccount()
+
+        // Sign out locally (the server-side account is already deleted)
+        try? Auth.auth().signOut()
+        GIDSignIn.sharedInstance.signOut()
+    }
+
     // MARK: - Private Helpers
 
     private func createUserDocumentIfNeeded(for user: FirebaseAuth.User, fullName: PersonNameComponents?) async {

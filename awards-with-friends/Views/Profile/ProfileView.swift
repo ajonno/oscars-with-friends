@@ -5,6 +5,10 @@ import Kingfisher
 struct ProfileView: View {
     @Environment(AuthService.self) private var authService
     @State private var showSignOutConfirmation = false
+    @State private var showDeleteAccountConfirmation = false
+    @State private var showDeleteAccountFinalConfirmation = false
+    @State private var isDeletingAccount = false
+    @State private var deleteAccountError: String?
 
     private var user: FirebaseAuth.User? {
         Auth.auth().currentUser
@@ -103,6 +107,26 @@ struct ProfileView: View {
                         Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                     }
                 }
+
+                // Delete Account Section
+                Section {
+                    Button(role: .destructive) {
+                        showDeleteAccountConfirmation = true
+                    } label: {
+                        if isDeletingAccount {
+                            HStack {
+                                ProgressView()
+                                    .padding(.trailing, 8)
+                                Text("Deleting Account...")
+                            }
+                        } else {
+                            Label("Delete Account", systemImage: "trash")
+                        }
+                    }
+                    .disabled(isDeletingAccount)
+                } footer: {
+                    Text("This will permanently delete your account and all associated data.")
+                }
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -117,6 +141,54 @@ struct ProfileView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Are you sure you want to sign out?")
+            }
+            .confirmationDialog(
+                "Delete Account",
+                isPresented: $showDeleteAccountConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Account", role: .destructive) {
+                    showDeleteAccountFinalConfirmation = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to delete your account? This action cannot be undone.")
+            }
+            .confirmationDialog(
+                "Final Confirmation",
+                isPresented: $showDeleteAccountFinalConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Yes, Delete My Account", role: .destructive) {
+                    deleteAccount()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all your data including competitions you've joined and votes you've cast. Are you absolutely sure?")
+            }
+            .alert("Error", isPresented: .init(
+                get: { deleteAccountError != nil },
+                set: { if !$0 { deleteAccountError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(deleteAccountError ?? "An error occurred")
+            }
+        }
+    }
+
+    private func deleteAccount() {
+        isDeletingAccount = true
+        deleteAccountError = nil
+
+        Task {
+            do {
+                try await authService.deleteAccount()
+            } catch {
+                await MainActor.run {
+                    deleteAccountError = error.localizedDescription
+                    isDeletingAccount = false
+                }
             }
         }
     }

@@ -170,6 +170,18 @@ final class CloudFunctionsService {
         let callable = functions.httpsCallable("updateFcmToken")
         _ = try await callable.call(["token": token])
     }
+
+    // MARK: - Account Management
+
+    func deleteAccount() async throws {
+        let callable = functions.httpsCallable("deleteAccount")
+        let result = try await callable.call()
+
+        guard let data = result.data as? [String: Any],
+              let success = data["success"] as? Bool, success else {
+            throw CloudFunctionError.operationFailed("Failed to delete account data")
+        }
+    }
 }
 
 // MARK: - Errors
