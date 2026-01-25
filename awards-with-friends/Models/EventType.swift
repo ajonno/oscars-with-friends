@@ -58,15 +58,17 @@ final class EventTypeCache {
         startListening()
     }
 
-    /// Get display name for an event type ID
+    /// Get display name for an event type (by slug or document ID)
     func displayName(for eventId: String?) -> String {
         guard let eventId else { return "Unknown Event" }
-        return eventTypes.first { $0.id == eventId }?.displayName ?? "Unknown Event"
+        // Try matching by slug first (ceremonies store the slug), then by document ID as fallback
+        return eventTypes.first { $0.slug == eventId || $0.id == eventId }?.displayName ?? "Unknown Event"
     }
 
-    /// Get color for an event type ID
+    /// Get color for an event type (by slug or document ID)
     func color(for eventId: String?) -> String? {
         guard let eventId else { return nil }
-        return eventTypes.first { $0.id == eventId }?.color
+        // Try matching by slug first (ceremonies store the slug), then by document ID as fallback
+        return eventTypes.first { $0.slug == eventId || $0.id == eventId }?.color
     }
 }

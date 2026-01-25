@@ -18,6 +18,7 @@ struct Competition: Codable, Identifiable, Hashable {
     let inviteCode: String
     let participantCount: Int
     let status: CompetitionStatus
+    let hidden: Bool?
     let inactivatedAt: Timestamp?
     let createdAt: Timestamp
     let updatedAt: Timestamp
@@ -44,6 +45,7 @@ struct Competition: Codable, Identifiable, Hashable {
             inviteCode: inviteCode,
             participantCount: participantCount,
             status: newStatus,
+            hidden: hidden,
             inactivatedAt: inactivatedAt,
             createdAt: createdAt,
             updatedAt: updatedAt
@@ -60,6 +62,7 @@ struct Competition: Codable, Identifiable, Hashable {
             inviteCode: "ABC123",
             participantCount: 5,
             status: status,
+            hidden: false,
             inactivatedAt: nil,
             createdAt: Timestamp(date: Date()),
             updatedAt: Timestamp(date: Date())

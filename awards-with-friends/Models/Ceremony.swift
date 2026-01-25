@@ -15,6 +15,7 @@ struct Ceremony: Codable, Identifiable {
     let event: String?
     let date: Timestamp?
     let status: CeremonyStatus
+    let hidden: Bool?
     let categoryCount: Int?
     let createdAt: Timestamp?
     let updatedAt: Timestamp?
@@ -31,6 +32,7 @@ struct Ceremony: Codable, Identifiable {
             event: event,
             date: Timestamp(date: Date()),
             status: status,
+            hidden: false,
             categoryCount: categoryCount,
             createdAt: Timestamp(date: Date()),
             updatedAt: Timestamp(date: Date())

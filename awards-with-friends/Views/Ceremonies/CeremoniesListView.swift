@@ -14,8 +14,9 @@ struct CeremoniesListView: View {
     }
 
     private var filteredCeremonies: [Ceremony] {
-        guard let selectedEvent else { return ceremonies }
-        return ceremonies.filter { $0.eventDisplayName == selectedEvent }
+        let visibleCeremonies = ceremonies.filter { $0.hidden != true }
+        guard let selectedEvent else { return visibleCeremonies }
+        return visibleCeremonies.filter { $0.eventDisplayName == selectedEvent }
     }
 
     var body: some View {

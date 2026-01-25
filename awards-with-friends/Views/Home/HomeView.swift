@@ -55,6 +55,10 @@ struct HomeView: View {
     private var sortedCompetitions: [Competition] {
         competitions
             .filter { competition in
+                // Hide hidden competitions (admin-hidden ceremonies)
+                if competition.hidden == true {
+                    return false
+                }
                 // Hide inactive competitions unless you're the owner
                 if competition.status == .inactive {
                     return competition.createdBy == currentUserId
