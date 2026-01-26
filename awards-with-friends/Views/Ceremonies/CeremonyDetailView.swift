@@ -76,7 +76,13 @@ struct CeremonyDetailView: View {
                 category: category,
                 ceremonyYear: ceremony.year,
                 initialVote: votes[category.id ?? ""],
-                hasActiveCompetition: openCompetitionCount > 0
+                hasActiveCompetition: openCompetitionCount > 0,
+                onVoteConfirmed: { vote in
+                    // Immediately update local votes so UI refreshes
+                    if let categoryId = category.id {
+                        votes[categoryId] = vote
+                    }
+                }
             )
         }
     }
@@ -268,6 +274,7 @@ struct CategoryViewSheet: View {
     let ceremonyYear: String
     let initialVote: Vote?
     let hasActiveCompetition: Bool
+    var onVoteConfirmed: ((Vote) -> Void)?  // Callback to notify parent of confirmed vote
 
     @Environment(\.dismiss) private var dismiss
     @State private var currentVote: Vote?
@@ -275,6 +282,7 @@ struct CategoryViewSheet: View {
     @State private var isVoting = false
     @State private var error: String?
     @State private var showVoteSuccess = false
+    @State private var pendingNomineeId: String?  // The nominee we're waiting to confirm
 
     private var canVote: Bool {
         !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
@@ -455,6 +463,35 @@ struct CategoryViewSheet: View {
             currentVote = initialVote
             selectedNomineeId = initialVote?.nomineeId
         }
+        .task {
+            // Set up live vote listener for this category
+            guard let categoryId = category.id else { return }
+            do {
+                for try await vote in FirestoreService.shared.myCategoryVoteStream(
+                    ceremonyYear: ceremonyYear,
+                    categoryId: categoryId,
+                    event: category.event
+                ) {
+                    currentVote = vote
+                    // If we have no selection yet, use the vote's nominee
+                    if selectedNomineeId == nil {
+                        selectedNomineeId = vote?.nomineeId
+                    }
+                    // Check if we were waiting for this vote to be confirmed
+                    if let pending = pendingNomineeId, let confirmedVote = vote, confirmedVote.nomineeId == pending {
+                        // Vote confirmed! Notify parent and dismiss the sheet
+                        showVoteSuccess = true
+                        pendingNomineeId = nil
+                        isVoting = false
+                        onVoteConfirmed?(confirmedVote)
+                        try? await Task.sleep(for: .milliseconds(200))
+                        dismiss()
+                    }
+                }
+            } catch {
+                // Handle silently
+            }
+        }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
     }
 
@@ -464,6 +501,7 @@ struct CategoryViewSheet: View {
 
         isVoting = true
         error = nil
+        pendingNomineeId = nomineeId  // Mark which nominee we're waiting to confirm
 
         do {
             _ = try await CloudFunctionsService.shared.castCeremonyVote(
@@ -471,12 +509,22 @@ struct CategoryViewSheet: View {
                 categoryId: categoryId,
                 nomineeId: nomineeId
             )
-            showVoteSuccess = true
-            // Brief delay to allow Firestore stream to propagate the update
-            try? await Task.sleep(for: .milliseconds(300))
-            dismiss()
+            // Don't dismiss here - wait for the vote listener to confirm
+            // The .task listener will detect the vote and dismiss
+
+            // Add a timeout in case the listener doesn't catch it
+            Task {
+                try? await Task.sleep(for: .seconds(5))
+                if pendingNomineeId != nil {
+                    // Timeout - dismiss anyway since cloud function succeeded
+                    pendingNomineeId = nil
+                    isVoting = false
+                    dismiss()
+                }
+            }
         } catch {
             self.error = error.localizedDescription
+            pendingNomineeId = nil
             isVoting = false
         }
     }
