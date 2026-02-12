@@ -311,7 +311,7 @@ struct InviteFriendsModifier: ViewModifier {
     @Binding var showInviteSheet: Bool
     @State private var showShareSheet = false
 
-    private let shareMessage = "Hey! I just installed Awards With Friends. You should grab it too so we can compete!\n\nhttps://apps.apple.com/app/id1638720136"
+    private let shareMessage = "Hey! I just installed Awards With Friends. You should grab it too so we can compete!\n\niOS: https://apps.apple.com/app/id1638720136\nAndroid: https://play.google.com/store/apps/details?id=com.aamsco.awardswithfriends"
 
     func body(content: Content) -> some View {
         content

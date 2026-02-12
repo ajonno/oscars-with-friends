@@ -88,7 +88,7 @@ struct CompetitionDetailView: View {
                         .buttonStyle(.bordered)
 
                         ShareLink(
-                            item: "Join my Oscar predictions competition! Use code: \(competition.inviteCode)"
+                            item: "Join my Oscar predictions competition! Use code: \(competition.inviteCode)\n\nDownload Awards With Friends:\niOS: https://apps.apple.com/app/id1638720136\nAndroid: https://play.google.com/store/apps/details?id=com.aamsco.awardswithfriends"
                         ) {
                             Image(systemName: "square.and.arrow.up")
                         }
