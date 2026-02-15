@@ -12,6 +12,8 @@ struct CategoryDetailView: View {
     @State private var isVoting = false
     @State private var error: String?
     @State private var showVoteSuccess = false
+    @State private var trailerYouTubeId: String?
+    @State private var trailerConfirmNominee: Nominee?
 
     var body: some View {
         Group {
@@ -45,7 +47,10 @@ struct CategoryDetailView: View {
                                             selectedNomineeId = nominee.id
                                         }
                                     }
-                                }
+                                },
+                                onPlayTrailer: nominee.trailerYouTubeId != nil ? {
+                                    trailerConfirmNominee = nominee
+                                } : nil
                             )
                         }
                     } header: {
@@ -89,6 +94,28 @@ struct CategoryDetailView: View {
             await loadData()
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
+        .alert(
+            "Play trailer?",
+            isPresented: Binding(
+                get: { trailerConfirmNominee != nil },
+                set: { if !$0 { trailerConfirmNominee = nil } }
+            )
+        ) {
+            Button("Play") {
+                trailerYouTubeId = trailerConfirmNominee?.trailerYouTubeId
+                trailerConfirmNominee = nil
+            }
+            Button("Cancel", role: .cancel) {
+                trailerConfirmNominee = nil
+            }
+        } message: {
+            if let nominee = trailerConfirmNominee {
+                Text("Watch the \(nominee.title) trailer?")
+            }
+        }
+        .fullScreenCover(item: $trailerYouTubeId) { youtubeId in
+            TrailerPlayerView(youTubeId: youtubeId)
+        }
     }
 
     private func loadData() async {
@@ -157,6 +184,7 @@ struct NomineeCard: View {
     let isWinner: Bool
     let isLocked: Bool
     let onTap: () -> Void
+    var onPlayTrailer: (() -> Void)? = nil
 
     // Placeholder images hosted on Firebase
     private static let personPlaceholder = URL(string: "https://awardswithfriends-25718.web.app/placeholders/person.svg")!
@@ -172,17 +200,22 @@ struct NomineeCard: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                // Selection indicator
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? .blue : .gray)
-                    .font(.title2)
+        HStack(spacing: 12) {
+            // Radio button + image — taps to vote
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isSelected ? .blue : .gray)
+                        .font(.title2)
 
-                // Nominee image
-                nomineeImage
+                    nomineeImage
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(isLocked)
 
-                // Nominee info
+            // Text area — taps to play trailer (or vote if no trailer)
+            Button(action: onPlayTrailer ?? onTap) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(nominee.title)
                         .font(.headline)
@@ -193,27 +226,36 @@ struct NomineeCard: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                }
 
-                Spacer()
-
-                // Winner badge
-                if isWinner {
-                    Label("Winner", systemImage: "trophy.fill")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.yellow)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.yellow.opacity(0.2))
-                        .cornerRadius(6)
+                    if onPlayTrailer != nil {
+                        HStack(spacing: 3) {
+                            Image(systemName: "play.circle")
+                            Text("Trailer Available")
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .disabled(isLocked && onPlayTrailer == nil)
+
+            // Winner badge
+            if isWinner {
+                Label("Winner", systemImage: "trophy.fill")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.yellow)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.2))
+                    .cornerRadius(6)
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(isLocked)
+        .padding(.vertical, 8)
         .opacity(isLocked && !isSelected && !isWinner ? 0.6 : 1)
     }
 

@@ -7,6 +7,26 @@ struct Nominee: Codable, Identifiable, Hashable {
     let subtitle: String?
     let imageUrl: String
     let tmdbId: String?
+    let trailerYouTubeId: String?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+        imageUrl = try container.decode(String.self, forKey: .imageUrl)
+        tmdbId = try container.decodeIfPresent(String.self, forKey: .tmdbId)
+        trailerYouTubeId = try container.decodeIfPresent(String.self, forKey: .trailerYouTubeId)
+    }
+
+    init(id: String, title: String, subtitle: String?, imageUrl: String, tmdbId: String?, trailerYouTubeId: String? = nil) {
+        self.id = id
+        self.title = title
+        self.subtitle = subtitle
+        self.imageUrl = imageUrl
+        self.tmdbId = tmdbId
+        self.trailerYouTubeId = trailerYouTubeId
+    }
 }
 
 struct Category: Codable, Identifiable {
@@ -61,13 +81,14 @@ struct Category: Codable, Identifiable {
 }
 
 extension Nominee {
-    static func preview(title: String, subtitle: String? = nil) -> Nominee {
+    static func preview(title: String, subtitle: String? = nil, trailerYouTubeId: String? = nil) -> Nominee {
         Nominee(
             id: UUID().uuidString,
             title: title,
             subtitle: subtitle,
             imageUrl: "https://image.tmdb.org/t/p/w500/placeholder.jpg",
-            tmdbId: nil
+            tmdbId: nil,
+            trailerYouTubeId: trailerYouTubeId
         )
     }
 

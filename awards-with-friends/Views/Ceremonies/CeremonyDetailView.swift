@@ -283,6 +283,8 @@ struct CategoryViewSheet: View {
     @State private var error: String?
     @State private var showVoteSuccess = false
     @State private var pendingNomineeId: String?  // The nominee we're waiting to confirm
+    @State private var trailerYouTubeId: String?
+    @State private var trailerConfirmNominee: Nominee?
 
     private var canVote: Bool {
         !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
@@ -400,7 +402,10 @@ struct CategoryViewSheet: View {
                                             selectedNomineeId = nominee.id
                                         }
                                     }
-                                }
+                                },
+                                onPlayTrailer: nominee.trailerYouTubeId != nil ? {
+                                    trailerConfirmNominee = nominee
+                                } : nil
                             )
                         }
                     }
@@ -493,6 +498,28 @@ struct CategoryViewSheet: View {
             }
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
+        .alert(
+            "Play trailer?",
+            isPresented: Binding(
+                get: { trailerConfirmNominee != nil },
+                set: { if !$0 { trailerConfirmNominee = nil } }
+            )
+        ) {
+            Button("Play") {
+                trailerYouTubeId = trailerConfirmNominee?.trailerYouTubeId
+                trailerConfirmNominee = nil
+            }
+            Button("Cancel", role: .cancel) {
+                trailerConfirmNominee = nil
+            }
+        } message: {
+            if let nominee = trailerConfirmNominee {
+                Text("Watch the \(nominee.title) trailer?")
+            }
+        }
+        .fullScreenCover(item: $trailerYouTubeId) { youtubeId in
+            TrailerPlayerView(youTubeId: youtubeId)
+        }
     }
 
     private func castVote() async {
@@ -536,32 +563,38 @@ struct NomineeVoteRow: View {
     let isWinner: Bool
     let isLocked: Bool
     let onTap: () -> Void
+    var onPlayTrailer: (() -> Void)? = nil
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                // Selection indicator (only show if voting is open)
-                if !isLocked {
-                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(isSelected ? .blue : .gray)
-                        .font(.title2)
-                }
+        HStack(spacing: 12) {
+            // Radio button + image — taps to vote
+            Button(action: onTap) {
+                HStack(spacing: 12) {
+                    if !isLocked {
+                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(isSelected ? .blue : .gray)
+                            .font(.title2)
+                    }
 
-                // Nominee image
-                if let url = URL(string: nominee.imageUrl) {
-                    KFImage(url)
-                        .placeholder {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.gray.opacity(0.2))
-                        }
-                        .fade(duration: 0.25)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 70)
-                        .cornerRadius(6)
+                    if let url = URL(string: nominee.imageUrl) {
+                        KFImage(url)
+                            .placeholder {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(Color.gray.opacity(0.2))
+                            }
+                            .fade(duration: 0.25)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 50, height: 70)
+                            .cornerRadius(6)
+                    }
                 }
+            }
+            .buttonStyle(.plain)
+            .disabled(isLocked)
 
-                // Nominee info
+            // Text area — taps to play trailer (or vote if no trailer)
+            Button(action: onPlayTrailer ?? onTap) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(nominee.title)
                         .font(.headline)
@@ -572,27 +605,36 @@ struct NomineeVoteRow: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-                }
 
-                Spacer()
-
-                // Winner badge
-                if isWinner {
-                    Label("Winner", systemImage: "trophy.fill")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.yellow)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.yellow.opacity(0.2))
-                        .cornerRadius(6)
+                    if onPlayTrailer != nil {
+                        HStack(spacing: 3) {
+                            Image(systemName: "play.circle")
+                            Text("Trailer Available")
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .disabled(isLocked && onPlayTrailer == nil)
+
+            // Winner badge
+            if isWinner {
+                Label("Winner", systemImage: "trophy.fill")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.yellow)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.2))
+                    .cornerRadius(6)
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(isLocked)
+        .padding(.vertical, 4)
     }
 }
 
