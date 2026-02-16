@@ -42,6 +42,8 @@ struct CeremoniesListView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 8)
 
+                AppUpdateBanner()
+
                 if !ceremonies.isEmpty {
                     eventFilter
                 }
@@ -71,6 +73,9 @@ struct CeremoniesListView: View {
         }
         .task {
             await loadCeremonies()
+        }
+        .task {
+            await AppUpdateService.shared.checkIfNeeded()
         }
     }
 

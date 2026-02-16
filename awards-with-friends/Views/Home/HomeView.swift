@@ -116,6 +116,8 @@ struct HomeView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 8)
 
+                AppUpdateBanner()
+
                 if !competitions.isEmpty {
                     Picker("Filter", selection: $filter) {
                         ForEach(CompetitionFilter.allCases, id: \.self) { option in
@@ -173,6 +175,9 @@ struct HomeView: View {
             }
             .task(id: refreshTrigger) {
                 await loadCompetitions()
+            }
+            .task {
+                await AppUpdateService.shared.checkIfNeeded()
             }
         }
     }

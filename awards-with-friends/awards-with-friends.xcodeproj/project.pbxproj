@@ -13,6 +13,8 @@
 		EF8896652F08AB9200A7DADF /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896642F08AB9200A7DADF /* StoreService.swift */; };
 		EF8896662F08AB9200A7DADF /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896632F08AB9200A7DADF /* ConfigService.swift */; };
 		EF8896682F08ABB300A7DADF /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896672F08ABB300A7DADF /* PaywallView.swift */; };
+		EFA2B0012F12B00000222222 /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA2B0002F12B00000222222 /* AppUpdateService.swift */; };
+		EFA2B0032F12B00000222222 /* AppUpdateBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */; };
 		EF88966A2F08AE4E00A7DADF /* products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = EF8896692F08AE4E00A7DADF /* products.storekit */; };
 		EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */; };
 		EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */; };
@@ -54,6 +56,8 @@
 
 /* Begin PBXFileReference section */
 		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
+		EFA2B0002F12B00000222222 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
+		EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateBanner.swift; sourceTree = "<group>"; };
 		EF8896632F08AB9200A7DADF /* ConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		EF8896642F08AB9200A7DADF /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		EF8896672F08ABB300A7DADF /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -163,6 +167,7 @@
 		EFEEBCFB2F06704A0072649D /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				EFA2B0002F12B00000222222 /* AppUpdateService.swift */,
 				EF8896632F08AB9200A7DADF /* ConfigService.swift */,
 				EF8896642F08AB9200A7DADF /* StoreService.swift */,
 				EFEEBCF72F06704A0072649D /* AuthService.swift */,
@@ -231,6 +236,7 @@
 		EFEEBD0F2F06704A0072649D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */,
 				EFEEBD472F0683060072649D /* Ceremonies */,
 				EFEEBCFF2F06704A0072649D /* Auth */,
 				EFEEBD022F06704A0072649D /* Categories */,
@@ -347,6 +353,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EFA2B0012F12B00000222222 /* AppUpdateService.swift in Sources */,
+				EFA2B0032F12B00000222222 /* AppUpdateBanner.swift in Sources */,
 				EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */,
 				EFEEBD162F06704A0072649D /* AuthService.swift in Sources */,
 				EFEEBD172F06704A0072649D /* oscars_with_friendsApp.swift in Sources */,
@@ -512,7 +520,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -529,7 +537,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -549,7 +557,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -566,7 +574,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
