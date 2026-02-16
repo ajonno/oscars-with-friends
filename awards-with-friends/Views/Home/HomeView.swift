@@ -66,8 +66,11 @@ struct HomeView: View {
                 return true
             }
             .sorted { comp1, comp2 in
-                // Sort by creation date (newest first)
-                comp1.createdAt.dateValue() > comp2.createdAt.dateValue()
+                // Inactive competitions always at the bottom
+                if comp1.status == .inactive && comp2.status != .inactive { return false }
+                if comp1.status != .inactive && comp2.status == .inactive { return true }
+                // Then sort by creation date (newest first)
+                return comp1.createdAt.dateValue() > comp2.createdAt.dateValue()
             }
     }
 
