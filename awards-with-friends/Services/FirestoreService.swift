@@ -231,6 +231,16 @@ final class FirestoreService {
         }
     }
 
+    func votesForUser(competitionId: String, userId: String) async throws -> [Vote] {
+        let snapshot = try await db.collection("competitions")
+            .document(competitionId)
+            .collection("votes")
+            .whereField("odUserId", isEqualTo: userId)
+            .getDocuments()
+
+        return snapshot.documents.compactMap { try? $0.data(as: Vote.self) }
+    }
+
     // MARK: - Ceremony Votes (across all competitions)
 
     func myCeremonyVotesStream(ceremonyYear: String, event: String? = nil) -> AsyncThrowingStream<[String: Vote], Error> {

@@ -36,6 +36,7 @@
 		EFEEBD252F06704A0072649D /* Competition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCED2F06704A0072649D /* Competition.swift */; };
 		EFEEBD272F06704A0072649D /* CompetitionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD072F06704A0072649D /* CompetitionCard.swift */; };
 		EFEEBD282F06704A0072649D /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */; };
+		EFB3C0032F14D00000333333 /* LeaderboardDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */; };
 		EFEEBD292F06704A0072649D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCE52F06704A0072649D /* AppDelegate.swift */; };
 		EFEEBD2A2F06704A0072649D /* CloudFunctionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF82F06704A0072649D /* CloudFunctionsService.swift */; };
 		EFEEBD2B2F06704A0072649D /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEF2F06704A0072649D /* User.swift */; };
@@ -88,6 +89,7 @@
 		EFEEBD072F06704A0072649D /* CompetitionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionCard.swift; sourceTree = "<group>"; };
 		EFEEBD082F06704A0072649D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardDisplayView.swift; sourceTree = "<group>"; };
 		EFEEBD0C2F06704A0072649D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		EFEEBD0E2F06704A0072649D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "awards-with-friends.entitlements"; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 		EFEEBD0B2F06704A0072649D /* Leaderboard */ = {
 			isa = PBXGroup;
 			children = (
+				EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */,
 				EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */,
 			);
 			path = Leaderboard;
@@ -378,6 +381,7 @@
 				EFEEBD252F06704A0072649D /* Competition.swift in Sources */,
 				EFEEBD272F06704A0072649D /* CompetitionCard.swift in Sources */,
 				EFEEBD282F06704A0072649D /* LeaderboardView.swift in Sources */,
+				EFB3C0032F14D00000333333 /* LeaderboardDisplayView.swift in Sources */,
 				EFEEBD292F06704A0072649D /* AppDelegate.swift in Sources */,
 				EFEEBD2A2F06704A0072649D /* CloudFunctionsService.swift in Sources */,
 				EFEEBD2B2F06704A0072649D /* User.swift in Sources */,
