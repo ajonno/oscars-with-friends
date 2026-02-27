@@ -7,15 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EFA1B0012F11A00000111111 /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = EFA1B0002F11A00000111111 /* YouTubePlayerKit */; };
 		EF368C5B2F068D3B00612459 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = EF368C5A2F068D3B00612459 /* Kingfisher */; };
 		EF368C5D2F07619800612459 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF368C5C2F07619800612459 /* EventType.swift */; };
 		EF8896652F08AB9200A7DADF /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896642F08AB9200A7DADF /* StoreService.swift */; };
 		EF8896662F08AB9200A7DADF /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896632F08AB9200A7DADF /* ConfigService.swift */; };
 		EF8896682F08ABB300A7DADF /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF8896672F08ABB300A7DADF /* PaywallView.swift */; };
+		EF88966A2F08AE4E00A7DADF /* products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = EF8896692F08AE4E00A7DADF /* products.storekit */; };
+		EFA1B0012F11A00000111111 /* YouTubePlayerKit in Frameworks */ = {isa = PBXBuildFile; productRef = EFA1B0002F11A00000111111 /* YouTubePlayerKit */; };
+		EFA1B0012F11A00A0072649D /* TrailerPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */; };
 		EFA2B0012F12B00000222222 /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA2B0002F12B00000222222 /* AppUpdateService.swift */; };
 		EFA2B0032F12B00000222222 /* AppUpdateBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */; };
-		EF88966A2F08AE4E00A7DADF /* products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = EF8896692F08AE4E00A7DADF /* products.storekit */; };
+		EFB3C0032F14D00000333333 /* LeaderboardDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */; };
 		EFD406D52F07A9B100E90E71 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */; };
 		EFEEBD152F06704A0072649D /* CompetitionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */; };
 		EFEEBD162F06704A0072649D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF72F06704A0072649D /* AuthService.swift */; };
@@ -29,12 +31,10 @@
 		EFEEBD1F2F06704A0072649D /* CreateCompetitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD042F06704A0072649D /* CreateCompetitionView.swift */; };
 		EFEEBD212F06704A0072649D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD082F06704A0072649D /* HomeView.swift */; };
 		EFEEBD222F06704A0072649D /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEB2F06704A0072649D /* Category.swift */; };
-		EFA1B0012F11A00A0072649D /* TrailerPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */; };
 		EFEEBD242F06704A0072649D /* Ceremony.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEC2F06704A0072649D /* Ceremony.swift */; };
 		EFEEBD252F06704A0072649D /* Competition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCED2F06704A0072649D /* Competition.swift */; };
 		EFEEBD272F06704A0072649D /* CompetitionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD072F06704A0072649D /* CompetitionCard.swift */; };
 		EFEEBD282F06704A0072649D /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */; };
-		EFB3C0032F14D00000333333 /* LeaderboardDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */; };
 		EFEEBD292F06704A0072649D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCE52F06704A0072649D /* AppDelegate.swift */; };
 		EFEEBD2A2F06704A0072649D /* CloudFunctionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCF82F06704A0072649D /* CloudFunctionsService.swift */; };
 		EFEEBD2B2F06704A0072649D /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEF2F06704A0072649D /* User.swift */; };
@@ -55,12 +55,14 @@
 
 /* Begin PBXFileReference section */
 		EF368C5C2F07619800612459 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
-		EFA2B0002F12B00000222222 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
-		EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateBanner.swift; sourceTree = "<group>"; };
 		EF8896632F08AB9200A7DADF /* ConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		EF8896642F08AB9200A7DADF /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		EF8896672F08ABB300A7DADF /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		EF8896692F08AE4E00A7DADF /* products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = products.storekit; sourceTree = SOURCE_ROOT; };
+		EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPlayerView.swift; sourceTree = "<group>"; };
+		EFA2B0002F12B00000222222 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
+		EFA2B0022F12B00000222222 /* AppUpdateBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateBanner.swift; sourceTree = "<group>"; };
+		EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardDisplayView.swift; sourceTree = "<group>"; };
 		EFD406D42F07A9B100E90E71 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EFD406D62F07B00000E90E71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EFEEBCD72F066F9F0072649D /* awards-with-friends.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "awards-with-friends.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -78,14 +80,12 @@
 		EFEEBCFA2F06704A0072649D /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		EFEEBCFD2F06704A0072649D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		EFEEBCFE2F06704A0072649D /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
-		EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPlayerView.swift; sourceTree = "<group>"; };
 		EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionDetailView.swift; sourceTree = "<group>"; };
 		EFEEBD042F06704A0072649D /* CreateCompetitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCompetitionView.swift; sourceTree = "<group>"; };
 		EFEEBD052F06704A0072649D /* JoinCompetitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCompetitionView.swift; sourceTree = "<group>"; };
 		EFEEBD072F06704A0072649D /* CompetitionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionCard.swift; sourceTree = "<group>"; };
 		EFEEBD082F06704A0072649D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		EFEEBD0A2F06704A0072649D /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
-		EFB3C0012F14D00000333333 /* LeaderboardDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardDisplayView.swift; sourceTree = "<group>"; };
 		EFEEBD0C2F06704A0072649D /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		EFEEBD0E2F06704A0072649D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EFEEBD352F06719F0072649D /* awards-with-friends.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "awards-with-friends.entitlements"; sourceTree = "<group>"; };
@@ -516,7 +516,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -533,7 +533,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -553,7 +553,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -570,7 +570,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -615,6 +615,14 @@
 				minimumVersion = 8.6.2;
 			};
 		};
+		EFA1B0022F11A00000111111 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		EFEEBD2F2F0671430072649D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -631,14 +639,6 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		EFA1B0022F11A00000111111 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SvenTiigi/YouTubePlayerKit.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -646,6 +646,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EF368C592F068D3B00612459 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		EFA1B0002F11A00000111111 /* YouTubePlayerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EFA1B0022F11A00000111111 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
+			productName = YouTubePlayerKit;
 		};
 		EFEEBD312F06718B0072649D /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -681,11 +686,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EFEEBD2F2F0671430072649D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
-		};
-		EFA1B0002F11A00000111111 /* YouTubePlayerKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EFA1B0022F11A00000111111 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
-			productName = YouTubePlayerKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
