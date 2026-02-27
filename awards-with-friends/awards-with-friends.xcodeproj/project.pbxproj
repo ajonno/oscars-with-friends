@@ -27,10 +27,8 @@
 		EFEEBD1D2F06704A0072649D /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCFA2F06704A0072649D /* NotificationService.swift */; };
 		EFEEBD1E2F06704A0072649D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD0E2F06704A0072649D /* ContentView.swift */; };
 		EFEEBD1F2F06704A0072649D /* CreateCompetitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD042F06704A0072649D /* CreateCompetitionView.swift */; };
-		EFEEBD202F06704A0072649D /* CategoriesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD002F06704A0072649D /* CategoriesListView.swift */; };
 		EFEEBD212F06704A0072649D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD082F06704A0072649D /* HomeView.swift */; };
 		EFEEBD222F06704A0072649D /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEB2F06704A0072649D /* Category.swift */; };
-		EFEEBD232F06704A0072649D /* CategoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBD012F06704A0072649D /* CategoryDetailView.swift */; };
 		EFA1B0012F11A00A0072649D /* TrailerPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */; };
 		EFEEBD242F06704A0072649D /* Ceremony.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCEC2F06704A0072649D /* Ceremony.swift */; };
 		EFEEBD252F06704A0072649D /* Competition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEEBCED2F06704A0072649D /* Competition.swift */; };
@@ -80,8 +78,6 @@
 		EFEEBCFA2F06704A0072649D /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		EFEEBCFD2F06704A0072649D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		EFEEBCFE2F06704A0072649D /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
-		EFEEBD002F06704A0072649D /* CategoriesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesListView.swift; sourceTree = "<group>"; };
-		EFEEBD012F06704A0072649D /* CategoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
 		EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPlayerView.swift; sourceTree = "<group>"; };
 		EFEEBD032F06704A0072649D /* CompetitionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompetitionDetailView.swift; sourceTree = "<group>"; };
 		EFEEBD042F06704A0072649D /* CreateCompetitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCompetitionView.swift; sourceTree = "<group>"; };
@@ -192,8 +188,6 @@
 		EFEEBD022F06704A0072649D /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				EFEEBD002F06704A0072649D /* CategoriesListView.swift */,
-				EFEEBD012F06704A0072649D /* CategoryDetailView.swift */,
 				EFA1B0002F11A00A0072649D /* TrailerPlayerView.swift */,
 			);
 			path = Categories;
@@ -371,11 +365,9 @@
 				EF8896662F08AB9200A7DADF /* ConfigService.swift in Sources */,
 				EFEEBD1E2F06704A0072649D /* ContentView.swift in Sources */,
 				EFEEBD1F2F06704A0072649D /* CreateCompetitionView.swift in Sources */,
-				EFEEBD202F06704A0072649D /* CategoriesListView.swift in Sources */,
 				EFEEBD212F06704A0072649D /* HomeView.swift in Sources */,
 				EFEEBD222F06704A0072649D /* Category.swift in Sources */,
 				EF368C5D2F07619800612459 /* EventType.swift in Sources */,
-				EFEEBD232F06704A0072649D /* CategoryDetailView.swift in Sources */,
 				EFA1B0012F11A00A0072649D /* TrailerPlayerView.swift in Sources */,
 				EFEEBD242F06704A0072649D /* Ceremony.swift in Sources */,
 				EFEEBD252F06704A0072649D /* Competition.swift in Sources */,

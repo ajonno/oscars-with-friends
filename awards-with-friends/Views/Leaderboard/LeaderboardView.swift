@@ -72,6 +72,7 @@ struct LeaderboardView: View {
                 categories: categories
             )
             .presentationDetents([.medium, .large])
+            .presentationSizing(.page)
         }
         .task {
             await loadParticipants()

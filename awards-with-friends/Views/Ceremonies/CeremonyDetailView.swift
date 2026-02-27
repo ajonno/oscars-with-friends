@@ -284,7 +284,7 @@ struct CategoryViewSheet: View {
     @State private var showVoteSuccess = false
     @State private var pendingNomineeId: String?  // The nominee we're waiting to confirm
     @State private var trailerYouTubeId: String?
-    @State private var trailerConfirmNominee: Nominee?
+    @State private var showDiscardAlert = false
 
     private var canVote: Bool {
         !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
@@ -396,49 +396,26 @@ struct CategoryViewSheet: View {
                                 isSelected: selectedNomineeId == nominee.id,
                                 isWinner: category.winnerId == nominee.id,
                                 isLocked: isDefinitelyLocked,
+                                hasTrailer: nominee.trailerYouTubeId != nil,
                                 onTap: {
                                     if !isDefinitelyLocked {
                                         withAnimation(.easeInOut(duration: 0.2)) {
                                             selectedNomineeId = nominee.id
                                         }
                                     }
-                                },
-                                onPlayTrailer: nominee.trailerYouTubeId != nil ? {
-                                    trailerConfirmNominee = nominee
-                                } : nil
-                            )
-                        }
-                    }
-                    // Vote Button - inside the nominees section
-                    if canVote {
-                        Button {
-                            Task {
-                                await castVote()
-                            }
-                        } label: {
-                            HStack {
-                                Spacer()
-                                if isVoting {
-                                    ProgressView()
-                                        .tint(.white)
-                                } else {
-                                    Text(currentVote != nil ? "Update Prediction" : "Submit Prediction")
-                                        .fontWeight(.semibold)
                                 }
-                                Spacer()
-                            }
-                            .padding(.vertical, 12)
-                            .background(
-                                hasChanges && !isVoting
-                                    ? Color.blue
-                                    : Color.gray.opacity(0.4)
                             )
-                            .foregroundStyle(.white)
-                            .cornerRadius(10)
+                            .swipeActions(edge: .trailing) {
+                                if nominee.trailerYouTubeId != nil {
+                                    Button {
+                                        trailerYouTubeId = nominee.trailerYouTubeId
+                                    } label: {
+                                        Label("Trailer", systemImage: "play.circle")
+                                    }
+                                    .tint(.blue)
+                                }
+                            }
                         }
-                        .buttonStyle(.plain)
-                        .disabled(!hasChanges || isVoting)
-                        .listRowSeparator(.hidden)
                     }
                 } header: {
                     Text(canVote ? "Select your prediction" : "Nominees")
@@ -452,16 +429,63 @@ struct CategoryViewSheet: View {
                     }
                 }
             }
+            .safeAreaInset(edge: .bottom) {
+                if canVote {
+                    Button {
+                        Task {
+                            await castVote()
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isVoting {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Text(currentVote != nil ? "Update Prediction" : "Submit Prediction")
+                                    .fontWeight(.semibold)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 14)
+                        .background(
+                            hasChanges && !isVoting
+                                ? Color.blue
+                                : Color.gray.opacity(0.4)
+                        )
+                        .foregroundStyle(.white)
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!hasChanges || isVoting)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(.bar)
+                }
+            }
             .navigationTitle(category.name)
             .navigationBarTitleDisplayMode(.inline)
             .contentMargins(.top, category.hasWinner || votingDisabledReason != nil ? 8 : -10, for: .scrollContent)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {
-                        dismiss()
+                        if hasChanges {
+                            showDiscardAlert = true
+                        } else {
+                            dismiss()
+                        }
                     }
                 }
             }
+        }
+        .interactiveDismissDisabled(hasChanges)
+        .alert("Unsaved Changes", isPresented: $showDiscardAlert) {
+            Button("Discard", role: .destructive) {
+                dismiss()
+            }
+            Button("Keep Editing", role: .cancel) {}
+        } message: {
+            Text("You have unsaved changes. Are you sure you want to leave?")
         }
         .onAppear {
             // Initialize from passed data
@@ -498,25 +522,6 @@ struct CategoryViewSheet: View {
             }
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
-        .alert(
-            "Play trailer?",
-            isPresented: Binding(
-                get: { trailerConfirmNominee != nil },
-                set: { if !$0 { trailerConfirmNominee = nil } }
-            )
-        ) {
-            Button("Play") {
-                trailerYouTubeId = trailerConfirmNominee?.trailerYouTubeId
-                trailerConfirmNominee = nil
-            }
-            Button("Cancel", role: .cancel) {
-                trailerConfirmNominee = nil
-            }
-        } message: {
-            if let nominee = trailerConfirmNominee {
-                Text("Watch the \(nominee.title) trailer?")
-            }
-        }
         .fullScreenCover(item: $trailerYouTubeId) { youtubeId in
             TrailerPlayerView(youTubeId: youtubeId)
         }
@@ -562,65 +567,52 @@ struct NomineeVoteRow: View {
     let isSelected: Bool
     let isWinner: Bool
     let isLocked: Bool
+    var hasTrailer: Bool = false
     let onTap: () -> Void
-    var onPlayTrailer: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
-            // Radio button + image — taps to vote
-            Button(action: onTap) {
-                HStack(spacing: 12) {
-                    if !isLocked {
-                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(isSelected ? .blue : .gray)
-                            .font(.title2)
-                    }
-
-                    if let url = URL(string: nominee.imageUrl) {
-                        KFImage(url)
-                            .placeholder {
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.gray.opacity(0.2))
-                            }
-                            .fade(duration: 0.25)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 50, height: 70)
-                            .cornerRadius(6)
-                    }
-                }
+            if !isLocked {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isSelected ? .blue : .gray)
+                    .font(.title2)
             }
-            .buttonStyle(.plain)
-            .disabled(isLocked)
 
-            // Text area — taps to play trailer (or vote if no trailer)
-            Button(action: onPlayTrailer ?? onTap) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(nominee.title)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-
-                    if let subtitle = nominee.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            if let url = URL(string: nominee.imageUrl) {
+                KFImage(url)
+                    .placeholder {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray.opacity(0.2))
                     }
+                    .fade(duration: 0.25)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 50, height: 70)
+                    .cornerRadius(6)
+            }
 
-                    if onPlayTrailer != nil {
-                        HStack(spacing: 3) {
-                            Image(systemName: "play.circle")
-                            Text("Trailer Available")
-                        }
-                        .font(.caption2)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(nominee.title)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+
+                if let subtitle = nominee.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
-                        .padding(.top, 2)
-                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+
+                if hasTrailer {
+                    HStack(spacing: 3) {
+                        Image(systemName: "play.circle")
+                        Text("Swipe for trailer")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+                }
             }
-            .buttonStyle(.plain)
-            .disabled(isLocked && onPlayTrailer == nil)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             // Winner badge
             if isWinner {
@@ -635,6 +627,12 @@ struct NomineeVoteRow: View {
             }
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if !isLocked {
+                onTap()
+            }
+        }
     }
 }
 
