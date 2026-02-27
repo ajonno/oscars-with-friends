@@ -27,6 +27,9 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+# Claude Code
+.claude/
+
 # OS files
 .DS_Store
 .AppleDouble
