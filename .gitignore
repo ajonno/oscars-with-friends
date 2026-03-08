@@ -54,3 +54,9 @@ playground.xcworkspace
 # Profiling
 *.gcno
 *.gcda
+
+# Firebase
+firebase-debug.log
+
+# Local config
+.mcp.json
