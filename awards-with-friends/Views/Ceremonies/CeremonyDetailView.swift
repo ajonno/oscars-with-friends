@@ -286,6 +286,22 @@ struct CategoryViewSheet: View {
     @State private var trailerYouTubeId: String?
     @State private var showDiscardAlert = false
 
+    private var usesDesktopTrailerControls: Bool {
+#if targetEnvironment(macCatalyst)
+        true
+#else
+        ProcessInfo.processInfo.isiOSAppOnMac
+#endif
+    }
+
+    private var desktopTrailerBinding: Binding<String?> {
+        usesDesktopTrailerControls ? $trailerYouTubeId : .constant(nil)
+    }
+
+    private var mobileTrailerBinding: Binding<String?> {
+        usesDesktopTrailerControls ? .constant(nil) : $trailerYouTubeId
+    }
+
     private var canVote: Bool {
         !category.isVotingLocked && !category.hasWinner && hasActiveCompetition
     }
@@ -397,6 +413,10 @@ struct CategoryViewSheet: View {
                                 isWinner: category.winnerId == nominee.id,
                                 isLocked: isDefinitelyLocked,
                                 hasTrailer: nominee.trailerYouTubeId != nil,
+                                showsInlineTrailerButton: usesDesktopTrailerControls,
+                                onTrailerTap: {
+                                    trailerYouTubeId = nominee.trailerYouTubeId
+                                },
                                 onTap: {
                                     if !isDefinitelyLocked {
                                         withAnimation(.easeInOut(duration: 0.2)) {
@@ -406,7 +426,7 @@ struct CategoryViewSheet: View {
                                 }
                             )
                             .swipeActions(edge: .trailing) {
-                                if nominee.trailerYouTubeId != nil {
+                                if !usesDesktopTrailerControls, nominee.trailerYouTubeId != nil {
                                     Button {
                                         trailerYouTubeId = nominee.trailerYouTubeId
                                     } label: {
@@ -522,7 +542,13 @@ struct CategoryViewSheet: View {
             }
         }
         .sensoryFeedback(.success, trigger: showVoteSuccess)
-        .fullScreenCover(item: $trailerYouTubeId) { youtubeId in
+        .sheet(item: desktopTrailerBinding) { youtubeId in
+            TrailerPlayerView(
+                youTubeId: youtubeId,
+                allowsDesktopFullscreenTransition: true
+            )
+        }
+        .fullScreenCover(item: mobileTrailerBinding) { youtubeId in
             TrailerPlayerView(youTubeId: youtubeId)
         }
     }
@@ -568,6 +594,8 @@ struct NomineeVoteRow: View {
     let isWinner: Bool
     let isLocked: Bool
     var hasTrailer: Bool = false
+    var showsInlineTrailerButton: Bool = false
+    var onTrailerTap: (() -> Void)?
     let onTap: () -> Void
 
     var body: some View {
@@ -605,7 +633,7 @@ struct NomineeVoteRow: View {
                 if hasTrailer {
                     HStack(spacing: 3) {
                         Image(systemName: "play.circle")
-                        Text("Swipe for trailer")
+                        Text(showsInlineTrailerButton ? "Click play for trailer" : "Swipe for trailer")
                     }
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -613,6 +641,16 @@ struct NomineeVoteRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            if showsInlineTrailerButton, hasTrailer, let onTrailerTap {
+                Button(action: onTrailerTap) {
+                    Image(systemName: "play.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Play trailer")
+            }
 
             // Winner badge
             if isWinner {
