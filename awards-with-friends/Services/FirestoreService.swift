@@ -58,16 +58,31 @@ final class FirestoreService {
         }
     }
 
-    /// One-time fetch of categories (for counts, etc.)
-    func getCategories(for ceremonyYear: String, event: String) async throws -> [Category] {
+    /// One-time fetch of categories (used when a view needs a fresh, server-backed snapshot)
+    func getCategories(
+        for ceremonyYear: String,
+        event: String? = nil,
+        source: FirestoreSource = .default
+    ) async throws -> [Category] {
         let snapshot = try await db.collection("categories")
             .whereField("ceremonyYear", isEqualTo: ceremonyYear)
-            .whereField("event", isEqualTo: event)
-            .getDocuments()
+            .order(by: "displayOrder")
+            .getDocuments(source: source)
 
-        return snapshot.documents.compactMap { doc -> Category? in
-            try? doc.data(as: Category.self)
+        var categories = snapshot.documents.compactMap { doc -> Category? in
+            do {
+                return try doc.data(as: Category.self)
+            } catch {
+                print("Failed to decode category \(doc.documentID): \(error)")
+                return nil
+            }
         }.filter { !$0.isHidden }
+
+        if let event {
+            categories = categories.filter { $0.event == event || $0.event == nil }
+        }
+
+        return categories
     }
 
     // MARK: - Competitions
@@ -231,14 +246,25 @@ final class FirestoreService {
         }
     }
 
-    func votesForUser(competitionId: String, userId: String) async throws -> [Vote] {
+    func votesForUser(
+        competitionId: String,
+        userId: String,
+        source: FirestoreSource = .default
+    ) async throws -> [Vote] {
         let snapshot = try await db.collection("competitions")
             .document(competitionId)
             .collection("votes")
             .whereField("odUserId", isEqualTo: userId)
-            .getDocuments()
+            .getDocuments(source: source)
 
-        return snapshot.documents.compactMap { try? $0.data(as: Vote.self) }
+        return snapshot.documents.compactMap { doc -> Vote? in
+            do {
+                return try doc.data(as: Vote.self)
+            } catch {
+                print("Failed to decode vote \(doc.documentID): \(error)")
+                return nil
+            }
+        }
     }
 
     // MARK: - Ceremony Votes (across all competitions)

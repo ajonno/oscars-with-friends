@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct LeaderboardView: View {
     let competition: Competition
@@ -209,11 +210,17 @@ private struct LeaderboardPreview: View {
 struct ParticipantPicksView: View {
     let participant: Participant
     let competition: Competition
-    let categories: [Category]
 
     @Environment(\.dismiss) private var dismiss
+    @State private var categories: [Category]
     @State private var votes: [Vote] = []
     @State private var isLoading = true
+
+    init(participant: Participant, competition: Competition, categories: [Category]) {
+        self.participant = participant
+        self.competition = competition
+        _categories = State(initialValue: categories)
+    }
 
     private var visibleCategories: [Category] {
         categories
@@ -252,7 +259,7 @@ struct ParticipantPicksView: View {
             }
         }
         .task {
-            await loadVotes()
+            await loadPicks()
         }
     }
 
@@ -304,19 +311,50 @@ struct ParticipantPicksView: View {
         .listStyle(.insetGrouped)
     }
 
-    private func loadVotes() async {
+    private func loadPicks() async {
         guard let competitionId = competition.id else {
             isLoading = false
             return
         }
 
         do {
-            votes = try await FirestoreService.shared.votesForUser(
-                competitionId: competitionId,
-                userId: participant.odUserId
+            async let freshCategories = FirestoreService.shared.getCategories(
+                for: competition.ceremonyYear,
+                event: competition.event,
+                source: .server
             )
+            async let freshVotes = FirestoreService.shared.votesForUser(
+                competitionId: competitionId,
+                userId: participant.odUserId,
+                source: .server
+            )
+
+            categories = try await freshCategories
+            votes = try await freshVotes
         } catch {
-            // Silently fail
+            do {
+                async let cachedCategories = FirestoreService.shared.getCategories(
+                    for: competition.ceremonyYear,
+                    event: competition.event,
+                    source: .default
+                )
+                async let cachedVotes = FirestoreService.shared.votesForUser(
+                    competitionId: competitionId,
+                    userId: participant.odUserId,
+                    source: .default
+                )
+
+                categories = try await cachedCategories
+                votes = try await cachedVotes
+            } catch {
+                // Keep the injected categories so the sheet can still render.
+            }
+        }
+
+        let knownCategoryIds = Set(categories.compactMap(\.id))
+        let unmatchedVotes = votes.filter { !knownCategoryIds.contains($0.categoryId) }
+        if !unmatchedVotes.isEmpty {
+            print("Participant picks has \(unmatchedVotes.count) unmatched votes for \(participant.displayName) in competition \(competitionId)")
         }
         isLoading = false
     }
@@ -387,4 +425,3 @@ struct LeaderboardRow: View {
         }
     }
 }
-
