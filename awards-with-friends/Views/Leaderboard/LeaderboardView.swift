@@ -8,27 +8,68 @@ struct LeaderboardView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var participants: [Participant] = []
     @State private var categories: [Category] = []
+    @State private var competitionVotes: [Vote] = []
     @State private var isLoading = true
     @State private var showDisplayMode = false
+    @State private var showReplaySettings = false
     @State private var selectedParticipant: Participant?
     @State private var error: String?
+    @State private var areCategoriesLoaded = false
+    @State private var areCompetitionVotesLoaded = false
+    @State private var replayState = CompetitionReplayState()
+
+    private var visibleCategories: [Category] {
+        categories
+            .filter { !$0.isHidden }
+            .sorted { $0.displayOrder < $1.displayOrder }
+    }
 
     private var totalCategories: Int {
-        categories.filter { !$0.isHidden }.count
+        visibleCategories.count
     }
 
     private var completedCategories: Int {
-        categories.filter { !$0.isHidden && $0.hasWinner }.count
+        visibleCategories.filter(\.hasWinner).count
+    }
+
+    private var revealedCategoriesCount: Int {
+        visibleCategories.filter { replayState.revealedCategoryIds.contains($0.id ?? "") }.count
     }
 
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
     }
 
+    private var canUseReplay: Bool {
+        completedCategories > 0
+    }
+
+    private var isReplayLoading: Bool {
+        replayState.isEnabled && (!areCategoriesLoaded || !areCompetitionVotesLoaded)
+    }
+
+    private var competitionVotesByParticipantId: [String: [String: Vote]] {
+        Dictionary(grouping: competitionVotes, by: \.odUserId).mapValues { votes in
+            Dictionary(uniqueKeysWithValues: votes.map { ($0.categoryId, $0) })
+        }
+    }
+
+    private var replayScoresByParticipantId: [String: Int] {
+        guard replayState.isEnabled else { return [:] }
+        return Dictionary(uniqueKeysWithValues: participants.map { participant in
+            let score = ReplayScoring.revealedScore(
+                votesByCategoryId: competitionVotesByParticipantId[participant.odUserId] ?? [:],
+                categories: visibleCategories,
+                revealedCategoryIds: replayState.revealedCategoryIds
+            )
+            return (participant.odUserId, score)
+        })
+    }
+
     var body: some View {
         Group {
-            if isLoading {
-                ProgressView("Loading leaderboard...")
+            if isLoading || isReplayLoading {
+                ProgressView(replayState.isEnabled ? "Loading replay..." : "Loading leaderboard...")
             } else if participants.isEmpty {
                 ContentUnavailableView(
                     "No Participants",
@@ -50,6 +91,18 @@ struct LeaderboardView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            if canUseReplay {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        if !replayState.isEnabled {
+                            replayState.isEnabled = true
+                        }
+                        showReplaySettings = true
+                    } label: {
+                        Label("Replay", systemImage: "eye")
+                    }
+                }
+            }
             if horizontalSizeClass == .regular {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -63,14 +116,25 @@ struct LeaderboardView: View {
         .fullScreenCover(isPresented: $showDisplayMode) {
             LeaderboardDisplayView(
                 competition: competition,
-                participants: participants
+                participants: participants,
+                displayScoresByUserId: replayScoresByParticipantId,
+                isReplayMode: replayState.isEnabled,
+                revealedCount: revealedCategoriesCount
             )
+        }
+        .sheet(isPresented: $showReplaySettings) {
+            ReplayRevealView(
+                replayState: $replayState,
+                categories: visibleCategories
+            )
+            .presentationDetents([.medium, .large])
         }
         .sheet(item: $selectedParticipant) { participant in
             ParticipantPicksView(
                 participant: participant,
                 competition: competition,
-                categories: categories
+                categories: categories,
+                replayState: replayState
             )
             .presentationDetents([.medium, .large])
             .presentationSizing(.page)
@@ -81,10 +145,42 @@ struct LeaderboardView: View {
         .task {
             await loadCategories()
         }
+        .task {
+            await loadCompetitionVotes()
+        }
+        .task {
+            loadReplayState()
+        }
+        .onChange(of: replayState) { _, newValue in
+            saveReplayState(newValue)
+        }
     }
 
     private var leaderboardList: some View {
         List {
+            if canUseReplay {
+                VStack(alignment: .leading, spacing: 12) {
+                    Toggle("Replay mode", isOn: $replayState.isEnabled)
+                        .font(.headline)
+
+                    Button {
+                        if !replayState.isEnabled {
+                            replayState.isEnabled = true
+                        }
+                        showReplaySettings = true
+                    } label: {
+                        Label("Replay reveals", systemImage: "eye")
+                    }
+
+                    if replayState.isEnabled {
+                        Text("\(revealedCategoriesCount) of \(totalCategories) categories revealed")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .listRowBackground(Color.clear)
+            }
+
             if !categories.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -94,6 +190,15 @@ struct LeaderboardView: View {
                     }
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                    if replayState.isEnabled {
+                        HStack {
+                            Label("Revealed: \(revealedCategoriesCount)", systemImage: "eye")
+                            Spacer()
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    }
 
                     if !competition.canVote {
                         Text("Tap on a row to see that person's votes")
@@ -114,6 +219,7 @@ struct LeaderboardView: View {
                         LeaderboardRow(
                             rank: index + 1,
                             participant: participant,
+                            displayScore: displayScore(for: participant),
                             isCurrentUser: participant.id == currentUserId
                         )
                         .contentShape(Rectangle())
@@ -123,6 +229,7 @@ struct LeaderboardView: View {
                     LeaderboardRow(
                         rank: index + 1,
                         participant: participant,
+                        displayScore: displayScore(for: participant),
                         isCurrentUser: participant.id == currentUserId
                     )
                 }
@@ -133,7 +240,18 @@ struct LeaderboardView: View {
     }
 
     private var sortedParticipants: [Participant] {
-        participants.sorted { $0.score > $1.score }
+        participants.sorted { lhs, rhs in
+            let lhsScore = displayScore(for: lhs)
+            let rhsScore = displayScore(for: rhs)
+            if lhsScore != rhsScore {
+                return lhsScore > rhsScore
+            }
+            return lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+        }
+    }
+
+    private func displayScore(for participant: Participant) -> Int {
+        replayState.isEnabled ? (replayScoresByParticipantId[participant.odUserId] ?? 0) : participant.score
     }
 
     private func loadParticipants() async {
@@ -157,10 +275,39 @@ struct LeaderboardView: View {
         do {
             for try await updatedCategories in FirestoreService.shared.categoriesStream(for: competition.ceremonyYear, event: competition.event) {
                 categories = updatedCategories
+                areCategoriesLoaded = true
             }
         } catch {
             // Silently fail - category counts are supplementary info
         }
+    }
+
+    private func loadCompetitionVotes() async {
+        guard let competitionId = competition.id else { return }
+
+        do {
+            for try await updatedVotes in FirestoreService.shared.competitionVotesStream(competitionId: competitionId) {
+                competitionVotes = updatedVotes
+                areCompetitionVotesLoaded = true
+            }
+        } catch {
+            // Silently fail - replay mode can remain unavailable if votes can't load.
+        }
+    }
+
+    private func loadReplayState() {
+        replayState = CompetitionReplayStore.load(
+            competitionId: competition.id,
+            userId: currentUserId
+        )
+    }
+
+    private func saveReplayState(_ state: CompetitionReplayState) {
+        CompetitionReplayStore.save(
+            state,
+            competitionId: competition.id,
+            userId: currentUserId
+        )
     }
 }
 
@@ -186,6 +333,7 @@ private struct LeaderboardPreview: View {
                 LeaderboardRow(
                     rank: index + 1,
                     participant: participant,
+                    displayScore: participant.score,
                     isCurrentUser: participant.displayName == "You"
                 )
             }
@@ -210,15 +358,17 @@ private struct LeaderboardPreview: View {
 struct ParticipantPicksView: View {
     let participant: Participant
     let competition: Competition
+    let replayState: CompetitionReplayState
 
     @Environment(\.dismiss) private var dismiss
     @State private var categories: [Category]
     @State private var votes: [Vote] = []
     @State private var isLoading = true
 
-    init(participant: Participant, competition: Competition, categories: [Category]) {
+    init(participant: Participant, competition: Competition, categories: [Category], replayState: CompetitionReplayState) {
         self.participant = participant
         self.competition = competition
+        self.replayState = replayState
         _categories = State(initialValue: categories)
     }
 
@@ -234,6 +384,14 @@ struct ParticipantPicksView: View {
 
     private func nomineeName(for vote: Vote, in category: Category) -> String {
         category.nominees.first { $0.id == vote.nomineeId }?.title ?? "Unknown"
+    }
+
+    private func isCategoryRevealed(_ category: Category) -> Bool {
+        !replayState.isEnabled || replayState.revealedCategoryIds.contains(category.id ?? "")
+    }
+
+    private func winnerNames(for category: Category) -> String {
+        ReplayScoring.winnerNames(for: category).joined(separator: "; ")
     }
 
     var body: some View {
@@ -266,7 +424,8 @@ struct ParticipantPicksView: View {
     private var picksList: some View {
         List(visibleCategories) { category in
             let userVote = vote(for: category)
-            let isCorrect = userVote.map { $0.nomineeId == category.winnerId } ?? false
+            let isRevealed = isCategoryRevealed(category)
+            let isCorrect = userVote.map { isRevealed && ReplayScoring.isCorrect($0, for: category) } ?? false
 
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -288,11 +447,15 @@ struct ParticipantPicksView: View {
                             .foregroundStyle(.tertiary)
                     }
 
-                    if category.hasWinner, let winner = category.winner, !isCorrect {
+                    if replayState.isEnabled && category.hasWinner && !isRevealed {
+                        Text("Winner hidden in replay mode")
+                            .font(.callout)
+                            .foregroundStyle(.tertiary)
+                    } else if category.hasWinner, !winnerNames(for: category).isEmpty, !isCorrect {
                         HStack(spacing: 4) {
                             Text("Winner:")
                                 .foregroundStyle(.secondary)
-                            Text(winner.title)
+                            Text(winnerNames(for: category))
                                 .foregroundStyle(.green)
                         }
                         .font(.callout)
@@ -301,7 +464,7 @@ struct ParticipantPicksView: View {
 
                 Spacer()
 
-                if category.hasWinner, userVote != nil {
+                if category.hasWinner, userVote != nil, isRevealed {
                     Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                         .foregroundStyle(isCorrect ? .green : .red)
                 }
@@ -363,6 +526,7 @@ struct ParticipantPicksView: View {
 struct LeaderboardRow: View {
     let rank: Int
     let participant: Participant
+    let displayScore: Int
     let isCurrentUser: Bool
 
     var body: some View {
@@ -376,7 +540,7 @@ struct LeaderboardRow: View {
                     .font(.headline)
                     .foregroundStyle(isCurrentUser ? .blue : .primary)
 
-                Text("Score: \(participant.score)")
+                Text("Score: \(displayScore)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -385,11 +549,11 @@ struct LeaderboardRow: View {
 
             // Score
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(participant.score)")
+                Text("\(displayScore)")
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text(participant.score == 1 ? "point" : "points")
+                Text(displayScore == 1 ? "point" : "points")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -423,5 +587,131 @@ struct LeaderboardRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 36)
         }
+    }
+}
+
+struct CompetitionReplayState: Codable, Equatable {
+    var isEnabled = false
+    var revealedCategoryIds: Set<String> = []
+}
+
+private enum CompetitionReplayStore {
+    static func load(competitionId: String?, userId: String?) -> CompetitionReplayState {
+        guard let key = storageKey(competitionId: competitionId, userId: userId),
+              let data = UserDefaults.standard.data(forKey: key),
+              let state = try? JSONDecoder().decode(CompetitionReplayState.self, from: data) else {
+            return CompetitionReplayState()
+        }
+        return state
+    }
+
+    static func save(_ state: CompetitionReplayState, competitionId: String?, userId: String?) {
+        guard let key = storageKey(competitionId: competitionId, userId: userId),
+              let data = try? JSONEncoder().encode(state) else {
+            return
+        }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+
+    private static func storageKey(competitionId: String?, userId: String?) -> String? {
+        guard let competitionId else { return nil }
+        return "ReplayState.\(userId ?? "anonymous").\(competitionId)"
+    }
+}
+
+private enum ReplayScoring {
+    static let liveActionShortFilmCategoryId = "SmoJl0PLjSCrGT6XU6Pg"
+    static let liveActionShortFilmTieNomineeId = "two-people-exchanging-saliva"
+
+    static func revealedScore(
+        votesByCategoryId: [String: Vote],
+        categories: [Category],
+        revealedCategoryIds: Set<String>
+    ) -> Int {
+        categories.reduce(into: 0) { score, category in
+            guard let categoryId = category.id,
+                  revealedCategoryIds.contains(categoryId),
+                  let vote = votesByCategoryId[categoryId],
+                  isCorrect(vote, for: category) else {
+                return
+            }
+            score += 1
+        }
+    }
+
+    static func isCorrect(_ vote: Vote, for category: Category) -> Bool {
+        winnerNomineeIds(for: category).contains(vote.nomineeId)
+    }
+
+    static func winnerNames(for category: Category) -> [String] {
+        winnerNomineeIds(for: category).compactMap { nomineeId in
+            category.nominees.first { $0.id == nomineeId }?.title
+        }
+    }
+
+    private static func winnerNomineeIds(for category: Category) -> [String] {
+        var nomineeIds: [String] = []
+        if let winnerId = category.winnerId {
+            nomineeIds.append(winnerId)
+        }
+        if category.id == liveActionShortFilmCategoryId,
+           !nomineeIds.contains(liveActionShortFilmTieNomineeId) {
+            nomineeIds.append(liveActionShortFilmTieNomineeId)
+        }
+        return nomineeIds
+    }
+}
+
+private struct ReplayRevealView: View {
+    @Binding var replayState: CompetitionReplayState
+    let categories: [Category]
+
+    @Environment(\.dismiss) private var dismiss
+
+    private var visibleCategories: [Category] {
+        categories
+            .filter { !$0.isHidden }
+            .sorted { $0.displayOrder < $1.displayOrder }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(visibleCategories) { category in
+                Toggle(isOn: isRevealedBinding(for: category)) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(category.name)
+                        if !category.hasWinner {
+                            Text("Winner not available yet")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .disabled(!category.hasWinner || category.id == nil)
+            }
+            .navigationTitle("Replay Reveals")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func isRevealedBinding(for category: Category) -> Binding<Bool> {
+        let categoryId = category.id ?? ""
+        return Binding(
+            get: {
+                replayState.revealedCategoryIds.contains(categoryId)
+            },
+            set: { isRevealed in
+                if isRevealed {
+                    replayState.revealedCategoryIds.insert(categoryId)
+                } else {
+                    replayState.revealedCategoryIds.remove(categoryId)
+                }
+            }
+        )
     }
 }

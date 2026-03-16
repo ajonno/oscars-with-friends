@@ -3,12 +3,22 @@ import SwiftUI
 struct LeaderboardDisplayView: View {
     let competition: Competition
     let participants: [Participant]
+    let displayScoresByUserId: [String: Int]
+    let isReplayMode: Bool
+    let revealedCount: Int
 
     @Environment(\.dismiss) private var dismiss
     @State private var categories: [Category] = []
 
     private var sortedParticipants: [Participant] {
-        participants.sorted { $0.score > $1.score }
+        participants.sorted { lhs, rhs in
+            let lhsScore = displayScore(for: lhs)
+            let rhsScore = displayScore(for: rhs)
+            if lhsScore != rhsScore {
+                return lhsScore > rhsScore
+            }
+            return lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+        }
     }
 
     private var totalCategories: Int {
@@ -48,6 +58,14 @@ struct LeaderboardDisplayView: View {
                                 Text("\(completedCategories)")
                                     .foregroundStyle(.white)
                             }
+                            if isReplayMode {
+                                HStack(spacing: 6) {
+                                    Text("Revealed:")
+                                        .foregroundStyle(.white.opacity(0.5))
+                                    Text("\(revealedCount)")
+                                        .foregroundStyle(.white)
+                                }
+                            }
                         }
                         .font(.system(size: 18, weight: .medium))
                         .padding(.top, 4)
@@ -75,6 +93,7 @@ struct LeaderboardDisplayView: View {
                                 DisplayRow(
                                     rank: index + 1,
                                     participant: participant,
+                                    displayScore: displayScore(for: participant),
                                     isEvenRow: index % 2 == 0
                                 )
                             }
@@ -116,11 +135,16 @@ struct LeaderboardDisplayView: View {
             // Silently fail - category counts are supplementary info
         }
     }
+
+    private func displayScore(for participant: Participant) -> Int {
+        displayScoresByUserId[participant.odUserId] ?? participant.score
+    }
 }
 
 private struct DisplayRow: View {
     let rank: Int
     let participant: Participant
+    let displayScore: Int
     let isEvenRow: Bool
 
     var body: some View {
@@ -136,7 +160,7 @@ private struct DisplayRow: View {
             Spacer()
 
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(participant.score)")
+                Text("\(displayScore)")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(.white)
 
@@ -186,6 +210,9 @@ private struct DisplayRow: View {
             Participant.preview(name: "James Brown", score: 6),
             Participant.preview(name: "Alex Rivera", score: 5),
             Participant.preview(name: "Olivia Park", score: 3),
-        ]
+        ],
+        displayScoresByUserId: [:],
+        isReplayMode: false,
+        revealedCount: 0
     )
 }

@@ -267,6 +267,42 @@ final class FirestoreService {
         }
     }
 
+    func competitionVotesStream(competitionId: String) -> AsyncThrowingStream<[Vote], Error> {
+        AsyncThrowingStream { continuation in
+            let listener = db.collection("competitions")
+                .document(competitionId)
+                .collection("votes")
+                .addSnapshotListener { snapshot, error in
+                    if let error {
+                        continuation.finish(throwing: error)
+                        return
+                    }
+
+                    guard let documents = snapshot?.documents else {
+                        continuation.yield([])
+                        return
+                    }
+
+                    let votes = documents.compactMap { doc -> Vote? in
+                        do {
+                            return try doc.data(as: Vote.self)
+                        } catch {
+                            print("Failed to decode competition vote \(doc.documentID): \(error)")
+                            return nil
+                        }
+                    }
+
+                    continuation.yield(votes)
+                }
+
+            self.listeners.append(listener)
+
+            continuation.onTermination = { @Sendable _ in
+                listener.remove()
+            }
+        }
+    }
+
     // MARK: - Ceremony Votes (across all competitions)
 
     func myCeremonyVotesStream(ceremonyYear: String, event: String? = nil) -> AsyncThrowingStream<[String: Vote], Error> {
