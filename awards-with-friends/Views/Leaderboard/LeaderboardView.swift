@@ -12,6 +12,7 @@ struct LeaderboardView: View {
     @State private var isLoading = true
     @State private var showDisplayMode = false
     @State private var showReplaySettings = false
+    @State private var showReplayDisableConfirmation = false
     @State private var selectedParticipant: Participant?
     @State private var error: String?
     @State private var areCategoriesLoaded = false
@@ -68,8 +69,8 @@ struct LeaderboardView: View {
 
     var body: some View {
         Group {
-            if isLoading || isReplayLoading {
-                ProgressView(replayState.isEnabled ? "Loading replay..." : "Loading leaderboard...")
+            if isLoading {
+                ProgressView("Loading leaderboard...")
             } else if participants.isEmpty {
                 ContentUnavailableView(
                     "No Participants",
@@ -94,12 +95,17 @@ struct LeaderboardView: View {
             if canUseReplay {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        if !replayState.isEnabled {
+                        if replayState.isEnabled {
+                            showReplayDisableConfirmation = true
+                        } else {
                             replayState.isEnabled = true
+                            showReplaySettings = true
                         }
-                        showReplaySettings = true
                     } label: {
-                        Label("Replay", systemImage: "eye")
+                        Label(
+                            replayState.isEnabled ? "Replay on" : "Replay off",
+                            systemImage: replayState.isEnabled ? "eye.slash" : "eye"
+                        )
                     }
                 }
             }
@@ -128,6 +134,14 @@ struct LeaderboardView: View {
                 categories: visibleCategories
             )
             .presentationDetents([.medium, .large])
+        }
+        .alert("Turn off replay mode?", isPresented: $showReplayDisableConfirmation) {
+            Button("Keep replay on", role: .cancel) {}
+            Button("Turn off", role: .destructive) {
+                replayState.isEnabled = false
+            }
+        } message: {
+            Text("This will stop hiding unrevealed winners and return the leaderboard to its normal scores.")
         }
         .sheet(item: $selectedParticipant) { participant in
             ParticipantPicksView(
@@ -160,8 +174,11 @@ struct LeaderboardView: View {
         List {
             if canUseReplay {
                 VStack(alignment: .leading, spacing: 12) {
-                    Toggle("Replay mode", isOn: $replayState.isEnabled)
-                        .font(.headline)
+                    Label(
+                        replayState.isEnabled ? "Replay mode is on" : "Replay mode is off",
+                        systemImage: replayState.isEnabled ? "eye" : "eye.slash"
+                    )
+                    .font(.headline)
 
                     Button {
                         if !replayState.isEnabled {
@@ -169,13 +186,19 @@ struct LeaderboardView: View {
                         }
                         showReplaySettings = true
                     } label: {
-                        Label("Replay reveals", systemImage: "eye")
+                        Label("Replay reveals", systemImage: "slider.horizontal.3")
                     }
+                    .buttonStyle(.borderedProminent)
 
                     if replayState.isEnabled {
                         Text("\(revealedCategoriesCount) of \(totalCategories) categories revealed")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+
+                        if isReplayLoading {
+                            ProgressView("Loading replay data...")
+                                .font(.caption)
+                        }
                     }
                 }
                 .listRowBackground(Color.clear)
@@ -251,7 +274,9 @@ struct LeaderboardView: View {
     }
 
     private func displayScore(for participant: Participant) -> Int {
-        replayState.isEnabled ? (replayScoresByParticipantId[participant.odUserId] ?? 0) : participant.score
+        guard replayState.isEnabled else { return participant.score }
+        guard !isReplayLoading else { return participant.score }
+        return replayScoresByParticipantId[participant.odUserId] ?? 0
     }
 
     private func loadParticipants() async {
