@@ -15,7 +15,20 @@ struct oscars_with_friendsApp: App {
     @State private var authService: AuthService
 
     init() {
-        FirebaseApp.configure()
+        let firebasePlistName: String = {
+            #if FIREBASE_DEV
+            return "GoogleService-Info-Dev"
+            #else
+            return "GoogleService-Info"
+            #endif
+        }()
+
+        if let filePath = Bundle.main.path(forResource: firebasePlistName, ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: filePath) {
+            FirebaseApp.configure(options: options)
+        } else {
+            FirebaseApp.configure()
+        }
 
         // Configure Google Sign-In with client ID from Firebase
         if let clientID = FirebaseApp.app()?.options.clientID {
