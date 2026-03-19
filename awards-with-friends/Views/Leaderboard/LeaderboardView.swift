@@ -2,6 +2,10 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 
+// Replay mode is temporarily disabled for the next release while the
+// canonical-vote changes ship to production.
+private let isReplayFeatureEnabled = false
+
 struct LeaderboardView: View {
     let competition: Competition
 
@@ -42,11 +46,11 @@ struct LeaderboardView: View {
     }
 
     private var canUseReplay: Bool {
-        completedCategories > 0
+        isReplayFeatureEnabled && completedCategories > 0
     }
 
     private var isReplayLoading: Bool {
-        replayState.isEnabled && (!areCategoriesLoaded || !areCompetitionVotesLoaded)
+        isReplayFeatureEnabled && replayState.isEnabled && (!areCategoriesLoaded || !areCompetitionVotesLoaded)
     }
 
     private var competitionVotesByParticipantId: [String: [String: Vote]] {
@@ -56,7 +60,7 @@ struct LeaderboardView: View {
     }
 
     private var replayScoresByParticipantId: [String: Int] {
-        guard replayState.isEnabled else { return [:] }
+        guard isReplayFeatureEnabled, replayState.isEnabled else { return [:] }
         return Dictionary(uniqueKeysWithValues: participants.map { participant in
             let score = ReplayScoring.revealedScore(
                 votesByCategoryId: competitionVotesByParticipantId[participant.odUserId] ?? [:],
@@ -166,6 +170,7 @@ struct LeaderboardView: View {
             loadReplayState()
         }
         .onChange(of: replayState) { _, newValue in
+            guard isReplayFeatureEnabled else { return }
             saveReplayState(newValue)
         }
     }
@@ -274,7 +279,7 @@ struct LeaderboardView: View {
     }
 
     private func displayScore(for participant: Participant) -> Int {
-        guard replayState.isEnabled else { return participant.score }
+        guard isReplayFeatureEnabled, replayState.isEnabled else { return participant.score }
         guard !isReplayLoading else { return participant.score }
         return replayScoresByParticipantId[participant.odUserId] ?? 0
     }
@@ -321,6 +326,10 @@ struct LeaderboardView: View {
     }
 
     private func loadReplayState() {
+        guard isReplayFeatureEnabled else {
+            replayState = CompetitionReplayState()
+            return
+        }
         replayState = CompetitionReplayStore.load(
             competitionId: competition.id,
             userId: currentUserId
