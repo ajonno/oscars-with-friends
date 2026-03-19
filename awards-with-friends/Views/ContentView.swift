@@ -25,6 +25,7 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut, value: authService.user != nil)
+        .devEnvironmentBanner()
     }
 }
 
@@ -75,4 +76,23 @@ struct MainTabView: View {
 #Preview("Logged Out") {
     ContentView()
         .environment(AuthService())
+}
+
+private extension View {
+    @ViewBuilder
+    func devEnvironmentBanner() -> some View {
+        #if FIREBASE_DEV
+        self.safeAreaInset(edge: .top) {
+            Text("DEV FIREBASE")
+                .font(.caption.weight(.bold))
+                .tracking(1.2)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.orange.gradient)
+        }
+        #else
+        self
+        #endif
+    }
 }

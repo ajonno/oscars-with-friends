@@ -645,9 +645,6 @@ private enum CompetitionReplayStore {
 }
 
 private enum ReplayScoring {
-    static let liveActionShortFilmCategoryId = "SmoJl0PLjSCrGT6XU6Pg"
-    static let liveActionShortFilmTieNomineeId = "two-people-exchanging-saliva"
-
     static func revealedScore(
         votesByCategoryId: [String: Vote],
         categories: [Category],
@@ -665,25 +662,13 @@ private enum ReplayScoring {
     }
 
     static func isCorrect(_ vote: Vote, for category: Category) -> Bool {
-        winnerNomineeIds(for: category).contains(vote.nomineeId)
+        category.isCorrectNominee(vote.nomineeId)
     }
 
     static func winnerNames(for category: Category) -> [String] {
-        winnerNomineeIds(for: category).compactMap { nomineeId in
+        category.resolvedCorrectNomineeIds.compactMap { nomineeId in
             category.nominees.first { $0.id == nomineeId }?.title
         }
-    }
-
-    private static func winnerNomineeIds(for category: Category) -> [String] {
-        var nomineeIds: [String] = []
-        if let winnerId = category.winnerId {
-            nomineeIds.append(winnerId)
-        }
-        if category.id == liveActionShortFilmCategoryId,
-           !nomineeIds.contains(liveActionShortFilmTieNomineeId) {
-            nomineeIds.append(liveActionShortFilmTieNomineeId)
-        }
-        return nomineeIds
     }
 }
 

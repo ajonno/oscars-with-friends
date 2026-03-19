@@ -410,7 +410,7 @@ struct CategoryViewSheet: View {
                             NomineeVoteRow(
                                 nominee: nominee,
                                 isSelected: selectedNomineeId == nominee.id,
-                                isWinner: category.winnerId == nominee.id,
+                                isWinner: category.isCorrectNominee(nominee.id),
                                 isLocked: isDefinitelyLocked,
                                 hasTrailer: nominee.trailerYouTubeId != nil,
                                 showsInlineTrailerButton: usesDesktopTrailerControls,

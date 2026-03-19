@@ -8,6 +8,7 @@ final class FirestoreService {
 
     private let db = Firestore.firestore()
     private var listeners: [ListenerRegistration] = []
+    private let ceremonyVotesCollection = "ceremonyVotes"
 
     private init() {}
 
@@ -18,6 +19,42 @@ final class FirestoreService {
     func removeAllListeners() {
         listeners.forEach { $0.remove() }
         listeners.removeAll()
+    }
+
+    private func ceremonyKey(ceremonyYear: String, event: String?) -> String {
+        "\(event ?? "default"):\(ceremonyYear)"
+    }
+
+    private func ceremonyVoteQuery(
+        ceremonyYear: String,
+        event: String?,
+        userId: String? = nil
+    ) -> Query {
+        var query: Query = db.collection(ceremonyVotesCollection)
+            .whereField("ceremonyKey", isEqualTo: ceremonyKey(ceremonyYear: ceremonyYear, event: event))
+
+        if let userId {
+            query = query.whereField("odUserId", isEqualTo: userId)
+        }
+
+        return query
+    }
+
+    private func competitionContext(
+        competitionId: String,
+        source: FirestoreSource = .default
+    ) async throws -> (ceremonyYear: String, event: String?) {
+        let snapshot = try await db.collection("competitions")
+            .document(competitionId)
+            .getDocument(source: source)
+
+        guard let competition = try? snapshot.data(as: Competition.self) else {
+            throw NSError(domain: "FirestoreService", code: 404, userInfo: [
+                NSLocalizedDescriptionKey: "Competition not found"
+            ])
+        }
+
+        return (competition.ceremonyYear, competition.event)
     }
 
     // MARK: - Categories
@@ -216,32 +253,44 @@ final class FirestoreService {
         }
 
         return AsyncThrowingStream { continuation in
-            let listener = db.collection("competitions")
-                .document(competitionId)
-                .collection("votes")
-                .whereField("odUserId", isEqualTo: userId)
-                .addSnapshotListener { snapshot, error in
-                    if let error {
-                        continuation.finish(throwing: error)
-                        return
+            var listener: ListenerRegistration?
+            let task = Task {
+                do {
+                    let context = try await self.competitionContext(competitionId: competitionId)
+                    listener = self.ceremonyVoteQuery(
+                        ceremonyYear: context.ceremonyYear,
+                        event: context.event,
+                        userId: userId
+                    )
+                    .addSnapshotListener { snapshot, error in
+                        if let error {
+                            continuation.finish(throwing: error)
+                            return
+                        }
+
+                        guard let documents = snapshot?.documents else {
+                            continuation.yield([])
+                            return
+                        }
+
+                        let votes = documents.compactMap { doc -> Vote? in
+                            try? doc.data(as: Vote.self)
+                        }
+
+                        continuation.yield(votes)
                     }
 
-                    guard let documents = snapshot?.documents else {
-                        continuation.yield([])
-                        return
+                    if let listener {
+                        self.listeners.append(listener)
                     }
-
-                    let votes = documents.compactMap { doc -> Vote? in
-                        try? doc.data(as: Vote.self)
-                    }
-
-                    continuation.yield(votes)
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-
-            self.listeners.append(listener)
+            }
 
             continuation.onTermination = { @Sendable _ in
-                listener.remove()
+                task.cancel()
+                listener?.remove()
             }
         }
     }
@@ -251,10 +300,12 @@ final class FirestoreService {
         userId: String,
         source: FirestoreSource = .default
     ) async throws -> [Vote] {
-        let snapshot = try await db.collection("competitions")
-            .document(competitionId)
-            .collection("votes")
-            .whereField("odUserId", isEqualTo: userId)
+        let context = try await competitionContext(competitionId: competitionId, source: source)
+        let snapshot = try await ceremonyVoteQuery(
+            ceremonyYear: context.ceremonyYear,
+            event: context.event,
+            userId: userId
+        )
             .getDocuments(source: source)
 
         return snapshot.documents.compactMap { doc -> Vote? in
@@ -269,36 +320,80 @@ final class FirestoreService {
 
     func competitionVotesStream(competitionId: String) -> AsyncThrowingStream<[Vote], Error> {
         AsyncThrowingStream { continuation in
-            let listener = db.collection("competitions")
-                .document(competitionId)
-                .collection("votes")
-                .addSnapshotListener { snapshot, error in
-                    if let error {
-                        continuation.finish(throwing: error)
-                        return
-                    }
+            var participantsListener: ListenerRegistration?
+            var voteListeners: [ListenerRegistration] = []
+            var votesByChunk: [Int: [Vote]] = [:]
 
-                    guard let documents = snapshot?.documents else {
-                        continuation.yield([])
-                        return
-                    }
+            func emitVotes() {
+                continuation.yield(votesByChunk.values.flatMap { $0 })
+            }
 
-                    let votes = documents.compactMap { doc -> Vote? in
-                        do {
-                            return try doc.data(as: Vote.self)
-                        } catch {
-                            print("Failed to decode competition vote \(doc.documentID): \(error)")
-                            return nil
+            let task = Task {
+                do {
+                    let context = try await self.competitionContext(competitionId: competitionId)
+                    participantsListener = self.db.collection("competitions")
+                        .document(competitionId)
+                        .collection("participants")
+                        .addSnapshotListener { snapshot, error in
+                            if let error {
+                                continuation.finish(throwing: error)
+                                return
+                            }
+
+                            let participantIds = snapshot?.documents.compactMap { doc -> String? in
+                                let blocked = doc.data()["blocked"] as? Bool ?? false
+                                return blocked ? nil : doc.documentID
+                            } ?? []
+
+                            voteListeners.forEach { $0.remove() }
+                            voteListeners.removeAll()
+                            votesByChunk.removeAll()
+
+                            if participantIds.isEmpty {
+                                emitVotes()
+                                return
+                            }
+
+                            for (index, chunk) in participantIds.chunked(into: 30).enumerated() {
+                                let listener = self.db.collection(self.ceremonyVotesCollection)
+                                    .whereField("ceremonyKey", isEqualTo: self.ceremonyKey(ceremonyYear: context.ceremonyYear, event: context.event))
+                                    .whereField("odUserId", in: chunk)
+                                    .addSnapshotListener { votesSnapshot, error in
+                                        if let error {
+                                            continuation.finish(throwing: error)
+                                            return
+                                        }
+
+                                        let votes = votesSnapshot?.documents.compactMap { doc -> Vote? in
+                                            do {
+                                                return try doc.data(as: Vote.self)
+                                            } catch {
+                                                print("Failed to decode canonical vote \(doc.documentID): \(error)")
+                                                return nil
+                                            }
+                                        } ?? []
+
+                                        votesByChunk[index] = votes
+                                        emitVotes()
+                                    }
+
+                                voteListeners.append(listener)
+                            }
                         }
+
+                    if let participantsListener {
+                        self.listeners.append(participantsListener)
                     }
-
-                    continuation.yield(votes)
+                    self.listeners.append(contentsOf: voteListeners)
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-
-            self.listeners.append(listener)
+            }
 
             continuation.onTermination = { @Sendable _ in
-                listener.remove()
+                task.cancel()
+                participantsListener?.remove()
+                voteListeners.forEach { $0.remove() }
             }
         }
     }
@@ -314,34 +409,8 @@ final class FirestoreService {
         }
 
         return AsyncThrowingStream { continuation in
-            var competitionListeners: [String: ListenerRegistration] = [:] // competitionId -> listener
-            var votesByCompetition: [String: [String: Vote]] = [:] // competitionId -> (categoryId -> Vote)
-            var activeCompetitionIds: Set<String> = []
-
-            func emitMergedVotes() {
-                // Merge votes from all competitions, keeping most recent per category
-                var mergedVotes: [String: Vote] = [:]
-                for (_, competitionVotes) in votesByCompetition {
-                    for (categoryId, vote) in competitionVotes {
-                        if let existing = mergedVotes[categoryId] {
-                            // Keep the most recent vote
-                            if vote.votedAt.dateValue() > existing.votedAt.dateValue() {
-                                mergedVotes[categoryId] = vote
-                            }
-                        } else {
-                            mergedVotes[categoryId] = vote
-                        }
-                    }
-                }
-                continuation.yield(mergedVotes)
-            }
-
-            // First, find competitions user is in for this ceremony year
-            let participantListener = db.collectionGroup("participants")
-                .whereField("odUserId", isEqualTo: userId)
+            let listener = ceremonyVoteQuery(ceremonyYear: ceremonyYear, event: event, userId: userId)
                 .addSnapshotListener { [weak self] snapshot, error in
-                    guard let self else { return }
-
                     if let error {
                         continuation.finish(throwing: error)
                         return
@@ -352,84 +421,18 @@ final class FirestoreService {
                         return
                     }
 
-                    // Get competition IDs
-                    let newCompetitionIds = Set(documents.compactMap { doc -> String? in
-                        doc.reference.parent.parent?.documentID
-                    })
-
-                    // Remove listeners for competitions user left
-                    let removedIds = activeCompetitionIds.subtracting(newCompetitionIds)
-                    for compId in removedIds {
-                        competitionListeners[compId]?.remove()
-                        competitionListeners.removeValue(forKey: compId)
-                        votesByCompetition.removeValue(forKey: compId)
+                    let mergedVotes = documents.compactMap { doc -> Vote? in
+                        try? doc.data(as: Vote.self)
+                    }.reduce(into: [String: Vote]()) { result, vote in
+                        result[vote.categoryId] = vote
                     }
-
-                    // Add listeners for new competitions
-                    let addedIds = newCompetitionIds.subtracting(activeCompetitionIds)
-                    for competitionId in addedIds {
-                        Task {
-                            do {
-                                let compDoc = try await self.db.collection("competitions")
-                                    .document(competitionId)
-                                    .getDocument()
-
-                                guard let compData = compDoc.data(),
-                                      compData["ceremonyYear"] as? String == ceremonyYear else {
-                                    return
-                                }
-
-                                // Also filter by event if specified
-                                if let event {
-                                    let compEvent = compData["event"] as? String
-                                    if compEvent != event && compEvent != nil {
-                                        return
-                                    }
-                                }
-
-                                // Listen to votes in this competition
-                                let votesListener = self.db.collection("competitions")
-                                    .document(competitionId)
-                                    .collection("votes")
-                                    .whereField("odUserId", isEqualTo: userId)
-                                    .addSnapshotListener { votesSnapshot, error in
-                                        if error != nil { return }
-
-                                        guard let voteDocs = votesSnapshot?.documents else { return }
-
-                                        // Replace all votes for this competition (not accumulate)
-                                        var competitionVotes: [String: Vote] = [:]
-                                        for voteDoc in voteDocs {
-                                            if let vote = try? voteDoc.data(as: Vote.self) {
-                                                competitionVotes[vote.categoryId] = vote
-                                            }
-                                        }
-                                        votesByCompetition[competitionId] = competitionVotes
-
-                                        emitMergedVotes()
-                                    }
-
-                                competitionListeners[competitionId] = votesListener
-                            } catch {
-                                // Handle silently
-                            }
-                        }
-                    }
-
-                    activeCompetitionIds = newCompetitionIds
-
-                    // If user has no competitions, emit empty
-                    if newCompetitionIds.isEmpty {
-                        votesByCompetition.removeAll()
-                        emitMergedVotes()
-                    }
+                    continuation.yield(mergedVotes)
                 }
 
-            self.listeners.append(participantListener)
+            self.listeners.append(listener)
 
             continuation.onTermination = { @Sendable _ in
-                participantListener.remove()
-                competitionListeners.values.forEach { $0.remove() }
+                listener.remove()
             }
         }
     }
@@ -447,104 +450,25 @@ final class FirestoreService {
         }
 
         return AsyncThrowingStream { continuation in
-            var competitionListeners: [String: ListenerRegistration] = [:]
-            var votesByCompetition: [String: Vote] = [:]
-            var activeCompetitionIds: Set<String> = []
-
-            func emitLatestVote() {
-                // Return the most recent vote across all competitions
-                let latestVote = votesByCompetition.values.max { $0.votedAt.dateValue() < $1.votedAt.dateValue() }
-                continuation.yield(latestVote)
-            }
-
-            let participantListener = db.collectionGroup("participants")
-                .whereField("odUserId", isEqualTo: userId)
-                .addSnapshotListener { [weak self] snapshot, error in
-                    guard let self else { return }
-
+            let listener = ceremonyVoteQuery(ceremonyYear: ceremonyYear, event: event, userId: userId)
+                .whereField("categoryId", isEqualTo: categoryId)
+                .addSnapshotListener { snapshot, error in
                     if let error {
                         continuation.finish(throwing: error)
                         return
                     }
 
-                    guard let documents = snapshot?.documents else {
-                        continuation.yield(nil)
-                        return
-                    }
+                    let vote = snapshot?.documents.compactMap { doc -> Vote? in
+                        try? doc.data(as: Vote.self)
+                    }.max(by: { $0.votedAt.dateValue() < $1.votedAt.dateValue() })
 
-                    let newCompetitionIds = Set(documents.compactMap { doc -> String? in
-                        doc.reference.parent.parent?.documentID
-                    })
-
-                    // Remove listeners for competitions user left
-                    let removedIds = activeCompetitionIds.subtracting(newCompetitionIds)
-                    for compId in removedIds {
-                        competitionListeners[compId]?.remove()
-                        competitionListeners.removeValue(forKey: compId)
-                        votesByCompetition.removeValue(forKey: compId)
-                    }
-
-                    // Add listeners for new competitions
-                    let addedIds = newCompetitionIds.subtracting(activeCompetitionIds)
-                    for competitionId in addedIds {
-                        Task {
-                            do {
-                                let compDoc = try await self.db.collection("competitions")
-                                    .document(competitionId)
-                                    .getDocument()
-
-                                guard let compData = compDoc.data(),
-                                      compData["ceremonyYear"] as? String == ceremonyYear else {
-                                    return
-                                }
-
-                                // Filter by event if specified
-                                if let event {
-                                    let compEvent = compData["event"] as? String
-                                    if compEvent != event && compEvent != nil {
-                                        return
-                                    }
-                                }
-
-                                // Listen to the specific vote document
-                                let voteId = "\(userId)_\(categoryId)"
-                                let voteListener = self.db.collection("competitions")
-                                    .document(competitionId)
-                                    .collection("votes")
-                                    .document(voteId)
-                                    .addSnapshotListener { voteSnapshot, error in
-                                        if error != nil { return }
-
-                                        if let voteSnapshot, voteSnapshot.exists,
-                                           let vote = try? voteSnapshot.data(as: Vote.self) {
-                                            votesByCompetition[competitionId] = vote
-                                        } else {
-                                            votesByCompetition.removeValue(forKey: competitionId)
-                                        }
-
-                                        emitLatestVote()
-                                    }
-
-                                competitionListeners[competitionId] = voteListener
-                            } catch {
-                                // Handle silently
-                            }
-                        }
-                    }
-
-                    activeCompetitionIds = newCompetitionIds
-
-                    if newCompetitionIds.isEmpty {
-                        votesByCompetition.removeAll()
-                        emitLatestVote()
-                    }
+                    continuation.yield(vote)
                 }
 
-            self.listeners.append(participantListener)
+            self.listeners.append(listener)
 
             continuation.onTermination = { @Sendable _ in
-                participantListener.remove()
-                competitionListeners.values.forEach { $0.remove() }
+                listener.remove()
             }
         }
     }

@@ -36,6 +36,7 @@ struct Category: Codable, Identifiable {
     let name: String
     let displayOrder: Int
     let winnerId: String?
+    let correctNomineeIds: [String]?
     let winnerAnnouncedAt: Timestamp?
     let votingLocked: Bool?
     let votingLockedAt: Timestamp?
@@ -53,12 +54,24 @@ struct Category: Codable, Identifiable {
     }
 
     var hasWinner: Bool {
-        winnerId != nil
+        !resolvedCorrectNomineeIds.isEmpty
     }
 
     var winner: Nominee? {
         guard let winnerId else { return nil }
         return nominees.first { $0.id == winnerId }
+    }
+
+    var resolvedCorrectNomineeIds: [String] {
+        var nomineeIds = correctNomineeIds ?? []
+        if let winnerId, !nomineeIds.contains(winnerId) {
+            nomineeIds.insert(winnerId, at: 0)
+        }
+        return nomineeIds
+    }
+
+    func isCorrectNominee(_ nomineeId: String) -> Bool {
+        resolvedCorrectNomineeIds.contains(nomineeId)
     }
 
     static func preview(name: String, event: String = "oscars", nominees: [Nominee] = Nominee.previewList) -> Category {
@@ -69,6 +82,7 @@ struct Category: Codable, Identifiable {
             name: name,
             displayOrder: 0,
             winnerId: nil,
+            correctNomineeIds: nil,
             winnerAnnouncedAt: nil,
             votingLocked: false,
             votingLockedAt: nil,
