@@ -644,7 +644,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -661,7 +661,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -681,7 +681,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -698,7 +698,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -718,7 +718,7 @@
 					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 					CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 					CODE_SIGN_STYLE = Automatic;
-					CURRENT_PROJECT_VERSION = 17;
+					CURRENT_PROJECT_VERSION = 18;
 					DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 					ENABLE_PREVIEWS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
@@ -735,7 +735,7 @@
 						"$(inherited)",
 						"@executable_path/Frameworks",
 					);
-					MARKETING_VERSION = 1.2.1;
+					MARKETING_VERSION = 1.4.0;
 					PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends.dev;
 					PRODUCT_NAME = "$(TARGET_NAME)";
 					STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -755,7 +755,7 @@
 					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 					CODE_SIGN_ENTITLEMENTS = "awards-with-friends.entitlements";
 					CODE_SIGN_STYLE = Automatic;
-					CURRENT_PROJECT_VERSION = 17;
+					CURRENT_PROJECT_VERSION = 18;
 					DEVELOPMENT_TEAM = MP6ZFBJ4X3;
 					ENABLE_PREVIEWS = YES;
 					GENERATE_INFOPLIST_FILE = YES;
@@ -772,7 +772,7 @@
 						"$(inherited)",
 						"@executable_path/Frameworks",
 					);
-					MARKETING_VERSION = 1.2.1;
+					MARKETING_VERSION = 1.4.0;
 					PRODUCT_BUNDLE_IDENTIFIER = com.aamsco.awardswithfriends.dev;
 					PRODUCT_NAME = "$(TARGET_NAME)";
 					STRING_CATALOG_GENERATE_SYMBOLS = YES;
